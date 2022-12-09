@@ -1,18 +1,19 @@
 import React from "react";
+import Register from "./Register";
 
 function App() {
 	const [data, setData] = React.useState(null);
 
 	React.useEffect(() => {
 		fetch("/api")
-		.then((res) => res.json())
-		.then((data) => setData(data.message));
+			.then((res) => res.json())
+			.then((data) => setData(data.message));
 	}, []);
 
 	return (
-		<div className="App">
-			<p>{!data ? "Loading..." : data}</p>
-		</div>
+		<main className="App">
+			<Register/>
+		</main>
 	);
 }
 
