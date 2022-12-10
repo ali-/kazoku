@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 const MAIL_REGEX = /^[\w-]+@([\w-]+\.)+[\w-]+/;
-const PASS_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
+const PASS_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{3,24}$/;
 
 const Register = () => {
 	const emailRef = useRef();
@@ -42,11 +42,28 @@ const Register = () => {
 		setErrorMessage('');
 	}, [email, pass, match])
 
+	const handleRegistration = async(e) => {
+		e.preventDefault();
+		const v1 = MAIL_REGEX.test(email);
+		const v2 = PASS_REGEX.test(pass);
+		if (!v1 || !v2) {
+			setErrorMessage("Invalid entry");
+			return;
+		}
+		fetch('/user/1')
+			.then(response => {
+				console.log(response);
+				return response.json()
+			})
+		//console.log(email, pass);
+		setSuccess(true)
+	}
+
 	return (
 		<section>
 			<p ref={errorRef} className={errorMessage ? "errorMessage" : "offscreen"} aria-live="assertive">{errorMessage}</p>
 			<h2>Register</h2>
-			<form>
+			<form onSubmit={handleRegistration}>
 				<label htmlFor="email">Email:</label>
 				<input
 					type="text"
