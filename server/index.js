@@ -1,5 +1,6 @@
-const bodyParser = require('body-parser')
-const db = require('./database')
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const db = require('./database');
 const express = require('express');
 const path = require('path');
 const PORT = process.env.PORT || 3001;
@@ -7,6 +8,7 @@ const PORT = process.env.PORT || 3001;
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cors())
 
 const indexRouter = require('../routes/index');
 app.use('/', indexRouter);

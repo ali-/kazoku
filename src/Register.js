@@ -50,12 +50,7 @@ const Register = () => {
 			setErrorMessage("Invalid entry");
 			return;
 		}
-		fetch('/user/1')
-			.then(response => {
-				console.log(response);
-				return response.json()
-			})
-		//console.log(email, pass);
+		// TODO: Talk to API
 		setSuccess(true)
 	}
 
