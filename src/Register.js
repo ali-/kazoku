@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import axios, * as others from 'axios';
 
 const MAIL_REGEX = /^[\w-]+@([\w-]+\.)+[\w-]+/;
 const PASS_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{3,24}$/;
@@ -50,8 +51,12 @@ const Register = () => {
 			setErrorMessage("Invalid entry");
 			return;
 		}
-		// TODO: Talk to API
-		setSuccess(true)
+		const payload = { email: email, password: pass };
+		const headers = { 'Content-Type': 'application/json' };
+		const response = await axios.post('http://localhost:3001/api/user/create', payload, { headers: headers });
+		const data = response.data;
+		alert(data);
+		setSuccess(true);
 	}
 
 	return (

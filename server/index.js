@@ -11,9 +11,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cors())
 
 const indexRouter = require('../routes/index');
-app.use('/', indexRouter);
+app.use('/api', indexRouter);
 const userRouter = require('../routes/user');
-app.use('/user', userRouter);
+app.use('/api/user', userRouter);
 
 app.listen(PORT, function() {
 	console.log(`Server is running on port ${PORT}:`);
