@@ -3,8 +3,7 @@ const pool = new Pool({
 	user: 'Ali',
 	host: 'localhost',
 	database: 'kazoku',
-	password: 'password',
+	password: '',
 	port: 5432,
 })
-
 module.exports = pool
