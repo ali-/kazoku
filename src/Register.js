@@ -53,9 +53,9 @@ const Register = () => {
 		}
 		const payload = { email: email, password: pass };
 		const headers = { 'Content-Type': 'application/json' };
-		const response = await axios.post('http://localhost:3001/api/user/create', payload, { headers: headers });
+		const response = await axios.post('http://localhost:3001/api/user/register', payload, { headers: headers });
 		const data = response.data;
-		alert(data);
+		alert(data.status);
 		setSuccess(true);
 	}
 
