@@ -1,0 +1,6 @@
+{
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+	"confirm-password": "Confirm Password"
+}

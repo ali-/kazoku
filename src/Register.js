@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import axios, * as others from 'axios';
+import strings from './localization/en.json'
 
 const MAIL_REGEX = /^[\w-]+@([\w-]+\.)+[\w-]+/;
 const PASS_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{3,24}$/;
@@ -62,9 +63,9 @@ const Register = () => {
 	return (
 		<section>
 			<p ref={errorRef} className={errorMessage ? "errorMessage" : "offscreen"} aria-live="assertive">{errorMessage}</p>
-			<h2>Register</h2>
+			<h2>{strings["register"]}</h2>
 			<form onSubmit={handleRegistration}>
-				<label htmlFor="email">Email:</label>
+				<label htmlFor="email">{strings["email"]}:</label>
 				<input
 					type="text"
 					id="email"
@@ -79,7 +80,7 @@ const Register = () => {
 				/>
 				<p id="emailnote" className={emailFocus && email && !validEmail ? "instructions" : "offscreen"}>E-mail address is invalid, please confirm your entry</p>
 
-				<label htmlFor="password">Password:</label>
+				<label htmlFor="password">{strings["password"]}:</label>
 				<input
 					type="password"
 					id="password"
@@ -92,7 +93,7 @@ const Register = () => {
 				/>
 				<p id="passnote" className={passFocus && pass && !validPass ? "instructions" : "offscreen"}>Password is invalid, please confirm your entry<br/>Must be 8 to 24 characters, must include uppercase and lowercase letters, a number, and a special character.</p>
 
-				<label htmlFor="password">Confirm Password:</label>
+				<label htmlFor="password">{strings["confirm-password"]}:</label>
 				<input
 					type="password"
 					id="match"
@@ -105,7 +106,7 @@ const Register = () => {
 				/>
 				<p id="matchnote" className={matchFocus && !validMatch ? "instructions" : "offscreen"}>Passwords do not match!</p>
 
-				<button disabled={!validEmail || !validPass || !validMatch ? true : false}>Register</button>
+				<button disabled={!validEmail || !validPass || !validMatch ? true : false}>{strings["register"]}</button>
 			</form>
 		</section>
 	)
