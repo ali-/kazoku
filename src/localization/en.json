@@ -1,6 +1,8 @@
 {
-    "register": "Register",
-    "email": "Email",
+	"confirm-password": "Confirm Password",
+	"email": "Email",
+	"firstname": "First Name",
+	"lastname": "Last Name",
     "password": "Password",
-	"confirm-password": "Confirm Password"
+    "register": "Register"
 }

@@ -58,14 +58,14 @@ router.post('/logout', async(request, response) => {
 // Register new user
 router.post('/register', (request, response, next) => {
 	// TODO: Verify email doesn't already exist and password meets requirements
-	const { email, password } = request.body
+	const { email, firstname, lastname, password } = request.body
 	if (email == null || password == null) {
 		response.json({status: "error1"});
 	}
 	try {
 		const passwordHashed = bcrypt.hashSync(password, 10);
 		console.log(passwordHashed);
-		const query = `INSERT INTO users(email, password) VALUES('${email}', '${passwordHashed}') RETURNING *`;
+		const query = `INSERT INTO users(email, firstname, lastname, password) VALUES('${email}', '${firstname}', '${lastname}', '${passwordHashed}') RETURNING *`;
 		db.query(query)
 			.then(users => {
 				const user = users.rows[0];

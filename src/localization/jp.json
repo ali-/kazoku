@@ -1,6 +1,8 @@
 {
-    "register": "アカウントを作成",
+	"confirm-password": "確認",
     "email": "メールアドレス",
+	"firstname": "姓",
+	"lastname": "名",
     "password": "パスワード",
-	"confirm-password": "確認"
+    "register": "アカウントを作成"
 }
