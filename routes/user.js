@@ -20,24 +20,26 @@ router.get('/:id', (request, response, next) => {
 router.post('/login', (request, response, next) => {
 	const { email, password } = request.body
 	if (email == null || password == null) {
-		return response.json({status: "error"});
+		response.json({ status: "null-error" });
 	}
 	try {
 		const query = `SELECT * FROM users WHERE email = ${email}`;
 		const data = db.query(query);
-		if (data.rows.length === 0) { response.status(403); }
+		if (data.rows.length === 0) {
+			response.json({ status: "user-not-found" });
+		}
 		const user = data.rows[0];
 		const matches = bcrypt.compareSync(password, user.password);
-		if (!matches) { return response.json({status: "error"}); }
+		if (!matches) { response.json({ status: "password-error" }); }
 		request.session.user = {
 			id: user.id,
 			email: user.email
 		};
-		return response.json({ user: request.session.user });
+		response.json({ user: request.session.user });
 	}
 	catch (error) {
 		console.error(error);
-        return response.json({status: "error"});
+        response.json({ status: "error" });
 	}
 });
 
@@ -45,12 +47,12 @@ router.post('/login', (request, response, next) => {
 // Logout user
 router.post('/logout', async(request, response) => {
 	try {
-		await request.session.destroy()
-		return response.json({status: "ok"});
+		await request.session.destroy();
+		response.json({ status: "ok" });
 	}
 	catch (error) {
-		console.error(error)
-		return response.json({status: "error"});
+		console.error(error);
+		response.json({ status: "error" });
 	}
 });
 
@@ -59,8 +61,8 @@ router.post('/logout', async(request, response) => {
 router.post('/register', (request, response, next) => {
 	// TODO: Verify email doesn't already exist and password meets requirements
 	const { email, firstname, lastname, password } = request.body
-	if (email == null || password == null) {
-		response.json({status: "error1"});
+	if (email == null || firstname == null || lastname == null || password == null) {
+		response.json({ status: "null-error" });
 	}
 	try {
 		const passwordHashed = bcrypt.hashSync(password, 10);
@@ -75,12 +77,12 @@ router.post('/register', (request, response, next) => {
 		        };
 			})
 			.finally(() => {
-				response.json({status: "ok"});
+				response.json({ status: "ok" });
 			})
 	}
 	catch (error) {
 		console.log(error);
-		response.json({status: "error2"});
+		response.json({ status: "db-error" });
 	}
 });
 
