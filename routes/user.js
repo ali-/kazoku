@@ -60,12 +60,12 @@ router.post('/register', (request, response, next) => {
 	// TODO: Verify email doesn't already exist and password meets requirements
 	const { email, password } = request.body
 	if (email == null || password == null) {
-		return response.json({status: "error1"});
+		response.json({status: "error1"});
 	}
 	try {
 		const passwordHashed = bcrypt.hashSync(password, 10);
 		console.log(passwordHashed);
-		const query = `INSERT INTO users(email, password) VALUES('${email}', '${passwordHashed}')`;
+		const query = `INSERT INTO users(email, password) VALUES('${email}', '${passwordHashed}') RETURNING *`;
 		db.query(query)
 			.then(users => {
 				const user = users.rows[0];
@@ -73,16 +73,14 @@ router.post('/register', (request, response, next) => {
 		            id: user.id,
 		            email: user.email
 		        };
+			})
+			.finally(() => {
 				response.json({status: "ok"});
 			})
-			.catch(error => {
-				console.log(error);
-				response.json({error});
-			});
 	}
 	catch (error) {
 		console.log(error);
-		return response.json({status: "error2"});
+		response.json({status: "error2"});
 	}
 });
 
