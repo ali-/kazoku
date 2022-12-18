@@ -24,9 +24,15 @@ app.use(
 	})
 );
 
+const albumRouter = require('../routes/album');
+const forumRouter = require('../routes/forum');
 const indexRouter = require('../routes/index');
+const photoRouter = require('../routes/photo');
 const userRouter = require('../routes/user');
 app.use('/api', indexRouter);
+app.use('/api/album', albumRouter);
+app.use('/api/forum', forumRouter);
+app.use('/api/photo', photoRouter);
 app.use('/api/user', userRouter);
 
 app.listen(PORT, function() {
