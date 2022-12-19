@@ -64,26 +64,22 @@ router.post('/register', (request, response, next) => {
 	if (email == null || firstname == null || lastname == null || password == null) {
 		response.json({ status: "null-error" });
 	}
-	try {
-		const passwordHashed = bcrypt.hashSync(password, 10);
-		console.log(passwordHashed);
-		const query = `INSERT INTO users(email, firstname, lastname, password) VALUES('${email}', '${firstname}', '${lastname}', '${passwordHashed}') RETURNING *`;
-		db.query(query)
-			.then(users => {
-				const user = users.rows[0];
-				request.session.user = {
-		            id: user.id,
-		            email: user.email
-		        };
-			})
-			.finally(() => {
-				response.json({ status: "ok" });
-			})
-	}
-	catch (error) {
-		console.log(error);
-		response.json({ status: "db-error" });
-	}
+	const passwordHashed = bcrypt.hashSync(password, 10);
+	console.log(passwordHashed);
+	const query = `INSERT INTO users(email, firstname, lastname, password) VALUES('${email}', '${firstname}', '${lastname}', '${passwordHashed}') RETURNING *`;
+	db.query(query)
+		.then(users => {
+			const user = users.rows[0];
+			request.session.user = {
+	            id: user.id,
+	            email: user.email
+	        };
+			response.json({ status: "ok" });
+		})
+		.catch(error => {
+			console.error(error.stack);
+			response.json({ status: "db-error" });
+		});
 });
 
 
