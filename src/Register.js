@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import axios, * as others from 'axios';
-import strings from './localization/en.json'
+import strings from './localization/en.json';
 
 const MAIL_REGEX = /^[\w-]+@([\w-]+\.)+[\w-]+/;
 const PASS_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{3,24}$/;
@@ -10,16 +10,16 @@ const Register = () => {
 	const errorRef = useRef();
 
 	const [email, setEmail] = useState('');
-	const [validEmail, setValidEmail] = useState(false);
 	const [emailFocus, setEmailFocus] = useState(false);
+	const [validEmail, setValidEmail] = useState(false);
 
-	const [pass, setPass] = useState('');
-	const [validPass, setValidPass] = useState(false);
-	const [passFocus, setPassFocus] = useState(false);
+	const [password, setPassword] = useState('');
+	const [passwordFocus, setPasswordFocus] = useState(false);
+	const [validPassword, setValidPassword] = useState(false);
 
 	const [match, setMatch] = useState('');
-	const [validMatch, setValidMatch] = useState(false);
 	const [matchFocus, setMatchFocus] = useState(false);
+	const [validMatch, setValidMatch] = useState(false);
 
 	const [firstname, setFirstname] = useState('');
 	const [lastname, setLastname] = useState('');
@@ -29,39 +29,39 @@ const Register = () => {
 
 	useEffect(() => {
 		emailRef.current.focus();
-	}, [])
+	}, []);
 
 	useEffect(() => {
 		const result = MAIL_REGEX.test(email);
 		setValidEmail(result);
-	}, [email])
+	}, [email]);
 
 	useEffect(() => {
-		const result = PASS_REGEX.test(pass);
-		setValidPass(result);
-		const valid = pass === match;
+		const result = PASS_REGEX.test(password);
+		setValidPassword(result);
+		const valid = password === match;
 		setValidMatch(valid);
-	}, [pass, match])
+	}, [password, match]);
 
 	useEffect(() => {
 		setErrorMessage('');
-	}, [email, pass, match])
+	}, [email, password, match]);
 
 	const handleRegistration = async(e) => {
 		e.preventDefault();
 		const v1 = MAIL_REGEX.test(email);
-		const v2 = PASS_REGEX.test(pass);
+		const v2 = PASS_REGEX.test(password);
 		if (firstname == null || lastname == null || !v1 || !v2) {
-			setErrorMessage("Invalid entry");
+			setErrorMessage("Enter first name and last name");
 			return;
 		}
-		const payload = { email: email, firstname: firstname, lastname: lastname, password: pass };
+		const payload = { email: email, firstname: firstname, lastname: lastname, password: password };
 		const headers = { 'Content-Type': 'application/json' };
 		const response = await axios.post('http://localhost:3001/api/user/register', payload, { headers: headers });
 		const data = response.data;
 		alert(data.status);
 		setSuccess(true);
-	}
+	};
 
 	return (
 		<section>
@@ -83,7 +83,6 @@ const Register = () => {
 				/>
 				<p id="emailnote" className={emailFocus && email && !validEmail ? "instructions" : "offscreen"}>E-mail address is invalid, please confirm your entry</p>
 				<br/>
-
 				<label htmlFor="firstname">{strings["firstname"]}:</label>
 				<input
 					type="text"
@@ -93,7 +92,6 @@ const Register = () => {
 					required
 				/>
 				<br/>
-
 				<label htmlFor="lastname">{strings["lastname"]}:</label>
 				<input
 					type="text"
@@ -103,39 +101,36 @@ const Register = () => {
 					required
 				/>
 				<br/>
-
 				<label htmlFor="password">{strings["password"]}:</label>
 				<input
 					type="password"
 					id="password"
-					onChange={(e) => setPass(e.target.value)}
+					onChange={(e) => setPassword(e.target.value)}
 					required
-					aria-invalid={validPass ? "false" : "true"}
+					aria-invalid={validPassword ? "false" : "true"}
 					aria-describedby="passnote"
-					onFocus={() => setPassFocus(true)}
-					onBlur={() => setPassFocus(false)}
+					onFocus={() => setPasswordFocus(true)}
+					onBlur={() => setPasswordFocus(false)}
 				/>
-				<p id="passnote" className={passFocus && pass && !validPass ? "instructions" : "offscreen"}>Password is invalid, please confirm your entry<br/>Must be 8 to 24 characters, must include uppercase and lowercase letters, a number, and a special character.</p>
+				<p id="passnote" className={passwordFocus && password && !validPassword ? "instructions" : "offscreen"}>Password is invalid, please confirm your entry<br/>Must be 8 to 24 characters, must include uppercase and lowercase letters, a number, and a special character.</p>
 				<br/>
-
-				<label htmlFor="password">{strings["confirm-password"]}:</label>
+				<label htmlFor="match">{strings["confirm-password"]}:</label>
 				<input
 					type="password"
 					id="match"
 					onChange={(e) => setMatch(e.target.value)}
 					required
-					aria-invalid={validPass ? "false" : "true"}
+					aria-invalid={validPassword ? "false" : "true"}
 					aria-describedby="matchnote"
 					onFocus={() => setMatchFocus(true)}
 					onBlur={() => setMatchFocus(false)}
 				/>
 				<p id="matchnote" className={matchFocus && !validMatch ? "instructions" : "offscreen"}>Passwords do not match!</p>
 				<br/>
-
-				<button disabled={!validEmail || !validPass || !validMatch ? true : false}>{strings["register"]}</button>
+				<button disabled={!validEmail || !validPassword || !validMatch ? true : false}>{strings["register"]}</button>
 			</form>
 		</section>
-	)
+	);
 }
 
 export default Register
