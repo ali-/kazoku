@@ -7,11 +7,9 @@ const Login = () => {
 	const errorRef = useRef();
 
 	const [email, setEmail] = useState('');
-	const [emailFocus, setEmailFocus] = useState(false);
 	const [validEmail, setValidEmail] = useState(false);
 
 	const [password, setPassword] = useState('');
-	const [passwordFocus, setPasswordFocus] = useState(false);
 	const [validPassword, setValidPassword] = useState(false);
 
 	const [errorMessage, setErrorMessage] = useState('');
