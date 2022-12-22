@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import axios, * as others from 'axios';
+import axios from 'axios';
 import strings from './localization/en.json';
 
 const Login = () => {
@@ -31,10 +31,6 @@ const Login = () => {
 		setValidPassword(result);
 	}, [password]);
 
-	useEffect(() => {
-		setErrorMessage('');
-	}, [email, password]);
-
 	const handleLogin = async(e) => {
 		e.preventDefault();
 		if (email == null || password == null) {
@@ -53,7 +49,7 @@ const Login = () => {
 		<section>
 			<p ref={errorRef} className={errorMessage ? "errorMessage" : "offscreen"} aria-live="assertive">{errorMessage}</p>
 			<h2>{strings["login"]}</h2>
-			<form onSumbit={handleLogin}>
+			<form onSubmit={handleLogin} autoComplete="off">
 				<label htmlFor="email">{strings["email"]}:</label>
 				<input
 					type="text"
@@ -62,8 +58,6 @@ const Login = () => {
 					onChange={(e) => setEmail(e.target.value)}
 					required
 					aria-invalid={validEmail ? "false" : "true"}
-					onFocus={() => setEmailFocus(true)}
-					onBlur={() => setEmailFocus(false)}
 				/>
 				<br/>
 				<label htmlFor="password">{strings["password"]}:</label>
@@ -73,8 +67,6 @@ const Login = () => {
 					onChange={(e) => setPassword(e.target.value)}
 					required
 					aria-invalid={validPassword ? "false" : "true"}
-					onFocus={() => setPasswordFocus(true)}
-					onBlur={() => setPasswordFocus(false)}
 				/>
 				<br/>
 				<button>{strings["login"]}</button>

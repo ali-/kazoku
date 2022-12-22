@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import axios, * as others from 'axios';
+import axios from 'axios';
 import strings from './localization/en.json';
 
 const MAIL_REGEX = /^[\w-]+@([\w-]+\.)+[\w-]+/;

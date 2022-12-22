@@ -22,28 +22,30 @@ router.post('/login', (request, response, next) => {
 	if (email == null || password == null) {
 		response.json({ status: "null-error" });
 	}
-	const query = `SELECT * FROM users WHERE email = '${email}'`;
-	db.query(query)
-		.then(users => {
-			const user = users.rows[0];
-			console.log(users.rows);
-			if (users.rows.length === 0) { response.json({ status: "user-not-found" }); }
-			else {
-				const matches = bcrypt.compareSync(password, user.password);
-				if (!matches) { response.json({ status: "password-error" }); }
+	else {
+		const query = `SELECT * FROM users WHERE email = '${email}'`;
+		db.query(query)
+			.then(users => {
+				if (users.rows.length === 0) { response.json({ status: "user-not-found" }); }
 				else {
-					request.session.user = {
-						id: user.id,
-						email: user.email
-					};
-					response.json({ user: request.session.user });
+					const user = users.rows[0];
+					const matches = bcrypt.compareSync(password, user.password);
+					if (!matches) { response.json({ status: "password-error" }); }
+					else {
+						request.session.user = {
+							id: user.id,
+							email: user.email
+						};
+						console.log(request.session.user);
+						response.json({ status: "ok" });
+					}
 				}
-			}
-		})
-		.catch (error => {
-			console.error(error.stack);
-	        response.json({ status: "db-error" });
-		});
+			})
+			.catch (error => {
+				console.error(error.stack);
+		        response.json({ status: "db-error" });
+			});
+	}
 });
 
 
