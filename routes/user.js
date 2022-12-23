@@ -10,8 +10,7 @@ router.get('/view/:id', (request, response, next) => {
 	const id = request.params.id;
 	const query = `SELECT * FROM users WHERE id = ${id}`;
 	db.query(query, (error, results) => {
-		response.json(results.rows);
-		console.log('here');
+		response.json({ results: results.rows, status: "ok" });
 	});
 });
 
@@ -20,17 +19,17 @@ router.get('/view/:id', (request, response, next) => {
 router.post('/login', (request, response, next) => {
 	const { email, password } = request.body;
 	if (email == null || password == null) {
-		response.json({ status: "null-error" });
+		response.json({ status: "error-null" });
 	}
 	else {
 		const query = `SELECT * FROM users WHERE email = '${email}'`;
 		db.query(query)
-			.then(users => {
-				if (users.rows.length === 0) { response.json({ status: "user-not-found" }); }
+			.then(results => {
+				if (results.rows.length === 0) { response.json({ status: "error-empty" }); }
 				else {
-					const user = users.rows[0];
+					const user = results.rows[0];
 					const matches = bcrypt.compareSync(password, user.password);
-					if (!matches) { response.json({ status: "password-error" }); }
+					if (!matches) { response.json({ status: "error-password" }); }
 					else {
 						request.session.user = {
 							id: user.id,
@@ -41,9 +40,9 @@ router.post('/login', (request, response, next) => {
 					}
 				}
 			})
-			.catch (error => {
+			.catch(error => {
 				console.error(error.stack);
-		        response.json({ status: "db-error" });
+		        response.json({ status: "error-db" });
 			});
 	}
 });
@@ -70,11 +69,11 @@ router.post('/register', (request, response, next) => {
 	const query_check = `SELECT * FROM users WHERE email = '${email}'`
 	const query_insert = `INSERT INTO users(email, firstname, lastname, password) VALUES('${email}', '${firstname}', '${lastname}', '${passwordHashed}') RETURNING *`;
 	if (email == null || firstname == null || lastname == null || password == null) {
-		response.json({ status: "null-error" });
+		response.json({ status: "error-null" });
 	}
 	db.query(query_check)
 		.then(users => {
-			if (users.rows.length > 0) { response.json({ status: "email-error" }); }
+			if (users.rows.length > 0) { response.json({ status: "error-email" }); }
 			else {
 				db.query(query_insert)
 					.then(users => {
@@ -90,7 +89,7 @@ router.post('/register', (request, response, next) => {
 		})
 		.catch(error => {
 			console.error(error.stack);
-			response.json({ status: "db-error" });
+			response.json({ status: "error-db" });
 		});
 });
 
