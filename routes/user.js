@@ -4,6 +4,12 @@ const express = require('express');
 const router = express.Router();
 const db = require('../server/database');
 
+// ----------------------------------------------------------------------
+// User
+// id: int, email: varchar, firstname: varchar, lastname: varchar
+// password: varchar, created_at: datetime, updated_at: datetime
+// ----------------------------------------------------------------------
+
 
 // View user profile
 router.get('/view/:id', (request, response, next) => {

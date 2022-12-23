@@ -3,6 +3,21 @@ const express = require('express');
 const router = express.Router();
 const db = require('../server/database');
 
+// ----------------------------------------------------------------------
+// Threads
+// id: int, user_id: int, title: varchar, content: text
+// created_at: datetime, updated_at: datetime
+// ----------------------------------------------------------------------
+// Thread_Favorites
+// id: int, user_id: int, thread_id: int
+// created_at: datetime, updated_at: datetime
+// ----------------------------------------------------------------------
+// Posts
+// id: int, user_id: int, thread_id: int, content: text
+// created_at: datetime, updated_at: datetime
+// ----------------------------------------------------------------------
+
+
 router.get('/', (request, response, next) => {
 	// TODO: Verify session
 	const query = `SELECT * FROM threads ORDER BY id ASC`;
@@ -15,6 +30,7 @@ router.get('/', (request, response, next) => {
 			response.json({ status: "error-db" });
 		});
 });
+
 
 router.get('/thread/:id', (request, response, next) => {
 	// TODO: Verify session
@@ -32,24 +48,30 @@ router.get('/thread/:id', (request, response, next) => {
 		});
 });
 
+
 router.delete('/thread/:id/delete', (request, response, next) => {
 	// TODO: Delete thread by ID
 });
+
 
 router.put('/thread/:id/edit', (request, response, next) => {
 	// TODO: Edit thread by ID
 });
 
+
 router.post('/thread/:id/post', (request, response, next) => {
 	// TODO: Post to thread by ID
 });
+
 
 router.post('/thread/create', (request, response, next) => {
 	// TODO: Create a new thread
 });
 
+
 router.delete('/post/:id/delete', (request, response, next) => {
 	// TODO: Delete post by ID
 });
+
 
 module.exports = router;
