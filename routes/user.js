@@ -14,10 +14,15 @@ const fn = require('../server/functions');
 
 router.get('/:id', (request, response, next) => {
 	const id = request.params.id;
-	const query = `SELECT * FROM users WHERE id = ${id}`;
-	db.query(query, (error, results) => {
-		return response.json({ results: results.rows, status: "ok" });
-	});
+	const user_id = request.session.user.id;
+	if (user_id == null) { return response.json({ status: "error", error: "session,invalid" }); }
+	const query = `SELECT email, firstname, lastname FROM users WHERE id = ${id}`;
+	db.query(query_check)
+		.then(results => { return response.json({ results: results.rows, status: "ok" }); })
+		.catch(error => {
+			console.error(error.stack);
+	        return response.json({ status: "error", error: "database" });
+		});
 });
 
 
@@ -31,17 +36,17 @@ router.put('/update', (request, response, next) => {
 	if (!fn.isEmpty(password)) {
 		if (password != passconf) { return response.json({ status: "error", error: "password,mismatch" }); }
 		const password_hashed = bcrypt.hashSync(password, 10);
-		update_password = `, users.password = ${password_hashed}`;
+		update_password = `, users.password = '${password_hashed}'`;
 	}
-	if (email != request.session.user.email) { update_email = `, users.email = ${email}`; }
+	if (email != request.session.user.email) { update_email = `, users.email = '${email}'`; }
 	// TODO: Check password requirements
 	const query_check = `SELECT * FROM users WHERE email = '${email}'`;
-	const query_update = `UPDATE users SET users.firstname = ${firstname}, users.lastname = ${lastname}${update_email}${update_password} WHERE id = ${id}`;
+	const query_update = `UPDATE users SET users.firstname = '${firstname}', users.lastname = '${lastname}'${update_email}${update_password} WHERE id = '${id}'`;
 	db.query(query_check)
 		.then(results => {
 			if (results.rows.length > 0) { return response.json({ status: "error", error: "email,taken" }); }
 			db.query(query_update)
-				.then(users => {
+				.then(() => {
 					// TODO: Destroy old session
 					return response.json({ status: "ok" });
 				});
@@ -56,7 +61,7 @@ router.put('/update', (request, response, next) => {
 router.post('/login', (request, response, next) => {
 	const { email, password } = request.body;
 	if (email == null || password == "") { return response.json({ status: "error", error: "input" }); }
-	
+
 	const query = `SELECT * FROM users WHERE email = '${email}'`;
 	db.query(query)
 		.then(results => {
