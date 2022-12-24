@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import axios from 'axios';
 import strings from './localization/en.json';
 
+
 const MAIL_REGEX = /^[\w-]+@([\w-]+\.)+[\w-]+/;
 const PASS_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{3,24}$/;
+
 
 const Register = () => {
 	const emailRef = useRef();
@@ -132,5 +134,6 @@ const Register = () => {
 		</section>
 	);
 }
+
 
 export default Register
