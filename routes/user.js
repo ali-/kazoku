@@ -12,12 +12,20 @@ const db = require('../server/database');
 
 
 // View user profile
-router.get('/view/:id', (request, response, next) => {
+router.get('/:id', (request, response, next) => {
 	const id = request.params.id;
 	const query = `SELECT * FROM users WHERE id = ${id}`;
 	db.query(query, (error, results) => {
 		response.json({ results: results.rows, status: "ok" });
 	});
+});
+
+
+// Update user account
+router.post('/:id/update', (request, response, next) => {
+	// TODO: Verify email doesn't already exist and password meets requirements
+	const { email, firstname, lastname, password } = request.body;
+	//
 });
 
 
@@ -100,11 +108,8 @@ router.post('/register', (request, response, next) => {
 });
 
 
-// Update user account
-router.put('/update/:id', (request, response, next) => {
-	// TODO: Verify email doesn't already exist and password meets requirements
-	const { email, firstname, lastname, password } = request.body;
-	//
+router.get('/settings', (request, response, next) => {
+	response.json({ status: "ok" });
 });
 
 

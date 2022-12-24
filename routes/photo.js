@@ -14,7 +14,7 @@ const db = require('../server/database');
 // ----------------------------------------------------------------------
 
 
-router.get('/', (request, response, next) => {
+router.get('/:id', (request, response, next) => {
 	response.json({ status: "ok" });
 });
 

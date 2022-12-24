@@ -10,22 +10,22 @@ const db = require('../server/database');
 // ----------------------------------------------------------------------
 
 
+router.delete('/:id', (request, response, next) => {
+	// TODO: Delete album by ID and all photos inside
+});
+
+
 router.get('/:id', (request, response, next) => {
 	// TODO: View album by ID
 });
 
 
-router.delete('/:id/delete', (request, response, next) => {
-	// TODO: Delete album by ID and all photos inside
+router.put('/:id', (request, response, next) => {
+	// TODO: Update an album by ID
 });
 
 
-router.post('/:id/edit', (request, response, next) => {
-	// TODO: Edit an album
-});
-
-
-router.put('/create', (request, response, next) => {
+router.post('/create', (request, response, next) => {
 	// TODO: Create an album
 });
 

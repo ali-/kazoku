@@ -49,18 +49,23 @@ router.get('/thread/:id', (request, response, next) => {
 });
 
 
-router.delete('/thread/:id/delete', (request, response, next) => {
+router.delete('/thread/:id', (request, response, next) => {
 	// TODO: Delete thread by ID
 });
 
 
-router.put('/thread/:id/edit', (request, response, next) => {
-	// TODO: Edit thread by ID
+router.post('/thread/:id/favorite', (request, response, next) => {
+	// TODO: Favorite thread by ID
 });
 
 
-router.post('/thread/:id/post', (request, response, next) => {
-	// TODO: Post to thread by ID
+router.post('/thread/:id/reply', (request, response, next) => {
+	// TODO: Reply to thread by ID
+});
+
+
+router.put('/thread/:id', (request, response, next) => {
+	// TODO: Update thread by ID
 });
 
 
@@ -69,8 +74,13 @@ router.post('/thread/create', (request, response, next) => {
 });
 
 
-router.delete('/post/:id/delete', (request, response, next) => {
+router.delete('/post/:id', (request, response, next) => {
 	// TODO: Delete post by ID
+});
+
+
+router.put('/post/:id', (request, response, next) => {
+	// TODO: Update post by ID
 });
 
 
