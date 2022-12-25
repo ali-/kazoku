@@ -16,7 +16,7 @@ router.get('/:id', (request, response, next) => {
 	const id = request.params.id;
 	const user_id = request.session.user.id;
 	if (user_id == null) { return response.json({ status: "error", error: "session,invalid" }); }
-	const query = `SELECT email, firstname, lastname FROM users WHERE id = ${id}`;
+	const query = `SELECT email, firstname, lastname FROM users WHERE id = '${id}'`;
 	db.query(query_check)
 		.then(results => { return response.json({ results: results.rows, status: "ok" }); })
 		.catch(error => {
