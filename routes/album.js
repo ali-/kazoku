@@ -16,13 +16,14 @@ router.delete('/:id', (request, response, next) => {
 	if (user_id == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const query_check = `SELECT * FROM albums WHERE id = '${id}'`;
 	db.query(query_check)
-		.then(results => {
-			const album = results.rows[0];
+		.then(albums => {
+			const album = albums.rows[0];
 			if (album.user_id != user_id) { return response.json({ status: "error", error: "invalid" }); }
 			const query_delete = `DELETE albums WHERE id = '${id}'`;
 			db.query(query_delete)
 				.then(() => {
 					// TODO: Delete all photos inside
+					console.log(`Album ${album.id} deleted`);
 					return response.json({ status: "ok" });
 				});
 		.catch(error => {
@@ -37,11 +38,11 @@ router.get('/:id', (request, response, next) => {
 	const user_id = request.session.user.id;
 	if (user_id == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const query = `SELECT * FROM albums WHERE id = ${id}`;
-	db.query(query_check)
-		.then(results => {
-			const album = results.rows[0];
+	db.query(query)
+		.then(albums => {
+			const album = albums.rows[0];
 			if (album.private === true && album.user_id != user_id) { return response.json({ status: "error", error: "album,private" }); }
-			return response.json({ results: results.rows, status: "ok" });
+			return response.json({ results: albums.rows, status: "ok" });
 		})
 		.catch(error => {
 			console.error(error.stack);
@@ -57,8 +58,8 @@ router.put('/:id', (request, response, next) => {
 	if (user_id == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const query_check = `SELECT * FROM albums WHERE id = '${id}'`;
 	db.query(query_check)
-		.then(results => {
-			const album = results.rows[0];
+		.then(albums => {
+			const album = albums.rows[0];
 			if (album.user_id != user_id) { return response.json({ status: "error", error: "invalid" }); }
 			const query_update = `UPDATE albums SET albums.title = '${title}', albums.caption = '${caption}', albums.private = '${private}' WHERE id = '${id}'`;
 			db.query(query_update).then(() => { return response.json({ status: "ok" }); });
@@ -78,7 +79,7 @@ router.post('/create', (request, response, next) => {
 	const query = `INSERT INTO albums(user_id, title, caption, private) VALUES('${user_id}', '${title}', '${caption}', '${private}') RETURNING *`;
 	db.query(query)
 		.then(albums => {
-			const album = results.rows[0];
+			const album = albums.rows[0];
 			return response.json({ album_id: album.id, status: "ok" });
 		})
 		.catch(error => {
