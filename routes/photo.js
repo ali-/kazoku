@@ -8,10 +8,17 @@ const db = require('../server/database');
 // id: int, user_id: int, album_id: int, caption: text, private: boolean
 // date: datetime, created_at: datetime, updated_at: datetime
 // ----------------------------------------------------------------------
+// Photo_Comments
+// id: int, user_id: int, photo_id: int, comment: text
+// created_at: datetime, updated_at: datetime
+// ----------------------------------------------------------------------
 // Photo_Favorites
 // id: int, user_id: int, photo_id: int
 // created_at: datetime, updated_at: datetime
 // ----------------------------------------------------------------------
+
+
+// TODO: Image uploading
 
 
 router.delete('/:id', (request, response, next) => {
@@ -79,6 +86,38 @@ router.put('/:id', (request, response, next) => {
 });
 
 
+router.post('/:id/comment', (request, response, next) => {
+	const { album, comment } = request.body;
+	const id = request.params.id;
+	const user_id = request.session.user.id;
+	const query_album = `SELECT * FROM albums WHERE id = '${album}'`;
+	const query_photo = `SELECT * FROM photos WHERE id = '${id}'`;
+	if (user_id == null) { return response.json({ status: "error", error: "session,invalid" }); }
+	db.query(query_album)
+		.then(albums => {
+			return Promise.all([albums, db.query(query_photo)]);
+		})
+		.then(([albums, photos]) => {
+			if (albums.rows.length == 0 || photos.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
+			const album = albums.rows[0];
+			const photo = photos.rows[0];
+			if ((album.private === true && album.user_id != user_id) || (photo.private === true && photo.user_id != user_id)) {
+				return response.json({ status: "error", error: "photo,private" });
+			}
+			const query_insert = `INSERT INTO photo_comments(user_id, photo_id, comment) VALUES('${user_id}', '${id}', '${comment}') RETURNING *`;
+			db.query(query_insert)
+				.then(() => {
+					console.log(`Commented on photo ${id}`);
+					return response.json({ status: "ok" });
+				});
+		})
+		.catch(error => {
+			console.error(error.stack);
+	        return response.json({ status: "error", error: "database" });
+		});
+});
+
+
 router.post('/:id/favorite', (request, response, next) => {
 	const { album } = request.body;
 	const id = request.params.id;
@@ -95,7 +134,7 @@ router.post('/:id/favorite', (request, response, next) => {
 			const album = albums.rows[0];
 			const photo = photos.rows[0];
 			if ((album.private === true && album.user_id != user_id) || (photo.private === true && photo.user_id != user_id)) {
-				return response.json({ status: "error", error: "album,private" });
+				return response.json({ status: "error", error: "photo,private" });
 			}
 			const query_insert = `INSERT INTO photo_favorites(user_id, photo_id) VALUES('${user_id}', '${id}') RETURNING *`;
 			db.query(query_insert)
