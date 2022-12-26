@@ -41,7 +41,7 @@ const Login = () => {
 					id="email"
 					ref={emailRef}
 					onChange={(e) => setEmail(e.target.value)}
-
+					required
 				/>
 				<br/>
 				<label htmlFor="password">{strings["password"]}:</label>
@@ -49,7 +49,7 @@ const Login = () => {
 					type="password"
 					id="password"
 					onChange={(e) => setPassword(e.target.value)}
-
+					required
 				/>
 				<br/>
 				<button>{strings["login"]}</button>

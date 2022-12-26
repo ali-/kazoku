@@ -43,7 +43,7 @@ router.get('/:id', (request, response, next) => {
 			if (albums.rows.length == 0) { return response.json({ status: "error", error: "album,unavailable" }); }
 			const album = albums.rows[0];
 			if (album.private === true && album.user_id != user_id) { return response.json({ status: "error", error: "album,private" }); }
-			return response.json({ results: albums.rows, status: "ok" });
+			return response.json({ albums: albums.rows, status: "ok" });
 		})
 		.catch(error => {
 			console.error(error.stack);

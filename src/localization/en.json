@@ -1,9 +1,11 @@
 {
+	"caption": "caption",
 	"confirm-password": "Confirm Password",
 	"email": "Email",
 	"firstname": "First Name",
 	"lastname": "Last Name",
 	"login": "Login",
+    "upload": "Upload",
     "password": "Password",
     "register": "Register"
 }

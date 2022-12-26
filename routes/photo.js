@@ -57,7 +57,7 @@ router.get('/:id', (request, response, next) => {
 				.then(albums => {
 					const album = albums.rows[0];
 					if ((album.private === true || photo.private === true) && album.user_id != user_id) { return response.json({ status: "error", error: "denied" }); }
-					return response.json({ results: photos.rows, status: "ok" });
+					return response.json({ photo: photo, status: "ok" });
 				});
 		})
 		.catch(error => {
@@ -151,12 +151,14 @@ router.post('/:id/favorite', (request, response, next) => {
 
 
 router.post('/create', (request, response, next) => {
+	// TODO: In the case where no album ID is provided, should be uploaded to users misc. uploads
 	const { album, caption, private, title } = request.body;
 	const user_id = request.session.user.id;
 	const query_album = `SELECT * FROM albums WHERE id = '${album}' AND user_id = '${user_id}'`;
 	if (user_id == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	db.query(query_album)
 		.then(albums => {
+			// Check here if album id != 0?
 			if (albums.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
 			const query_insert = `INSERT INTO photos(user_id, album_id, caption, private) VALUES('${user_id}', '${album}', '${caption}', '${private}') RETURNING *`;
 			db.query(query_insert)

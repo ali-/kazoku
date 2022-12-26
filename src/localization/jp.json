@@ -1,8 +1,11 @@
 {
+	"caption": "説明",
 	"confirm-password": "確認",
     "email": "メールアドレス",
 	"firstname": "姓",
 	"lastname": "名",
+	"login": "ログイン",
+    "upload": "アップロード",
     "password": "パスワード",
     "register": "アカウントを作成"
 }

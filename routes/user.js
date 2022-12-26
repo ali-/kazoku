@@ -18,7 +18,11 @@ router.get('/:id', (request, response, next) => {
 	if (user_id == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const query = `SELECT email, firstname, lastname FROM users WHERE id = '${id}'`;
 	db.query(query_check)
-		.then(results => { return response.json({ results: results.rows, status: "ok" }); })
+		.then(users => {
+			if (users.rows.length === 0) { return response.json({ status: "error", error: "empty" }); }
+			const user = users.rows[0];
+			return response.json({ user: user, status: "ok" });
+		})
 		.catch(error => {
 			console.error(error.stack);
 	        return response.json({ status: "error", error: "database" });
@@ -43,8 +47,8 @@ router.put('/update', (request, response, next) => {
 	const query_check = `SELECT * FROM users WHERE email = '${email}'`;
 	const query_update = `UPDATE users SET users.firstname = '${firstname}', users.lastname = '${lastname}'${update_email}${update_password} WHERE id = '${id}'`;
 	db.query(query_check)
-		.then(results => {
-			if (results.rows.length > 0) { return response.json({ status: "error", error: "email,taken" }); }
+		.then(users => {
+			if (users.rows.length > 0) { return response.json({ status: "error", error: "email,taken" }); }
 			db.query(query_update)
 				.then(() => {
 					// TODO: Destroy old session
@@ -61,12 +65,11 @@ router.put('/update', (request, response, next) => {
 router.post('/login', (request, response, next) => {
 	const { email, password } = request.body;
 	if (email == null || password == "") { return response.json({ status: "error", error: "input" }); }
-
 	const query = `SELECT * FROM users WHERE email = '${email}'`;
 	db.query(query)
-		.then(results => {
-			if (results.rows.length === 0) { return response.json({ status: "error", error: "user,none" }); }
-			const user = results.rows[0];
+		.then(users => {
+			if (users.rows.length === 0) { return response.json({ status: "error", error: "user,none" }); }
+			const user = users.rows[0];
 			const matches = bcrypt.compareSync(password, user.password);
 			if (!matches) { return response.json({ status: "error", error: "password" }); }
 			request.session.user = {
@@ -106,8 +109,8 @@ router.post('/register', (request, response, next) => {
 		.then(users => {
 			if (users.rows.length > 0) { return response.json({ status: "error", error: "email" }); }
 			db.query(query_insert)
-				.then(users => {
-					const user = users.rows[0];
+				.then(results => {
+					const user = results.rows[0];
 					request.session.user = {
 			            id: user.id,
 			            email: user.email
