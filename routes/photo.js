@@ -137,7 +137,7 @@ router.post('/:id/favorite', (request, response, next) => {
 			if ((album.private === true && album.user_id != user_id) || (photo.private === true && photo.user_id != user_id)) {
 				return response.json({ status: "error", error: "photo,private" });
 			}
-			const query_insert = `INSERT INTO photo_favorites(user_id, photo_id) VALUES('${user_id}', '${id}') RETURNING *`;
+			const query_insert = `INSERT INTO photo_favorites(user_id, photo_id) VALUES('${user_id}', '${id}')`;
 			db.query(query_insert)
 				.then(() => {
 					console.log(`Favorited photo ${id}`);
