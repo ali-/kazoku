@@ -3,18 +3,18 @@ const express = require('express');
 const router = express.Router();
 const db = require('../server/database');
 
-// ----------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // Albums
-// id: int, user_id: int, title: varchar, caption: text, private: boolean
-// created_at: datetime, updated_at: datetime
-// ----------------------------------------------------------------------
+// id: int, uuid: uuid, user_id: int, title: varchar, caption: text
+// private: boolean, created_at: datetime, updated_at: datetime
+// -----------------------------------------------------------------------------
 
 
-router.get('/:id', (request, response, next) => {
+router.get('/:uuid', (request, response, next) => {
 	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
-	const id = request.params.id;
+	const uuid = request.params.uuid;
 	const user_id = request.session.user.id;
-	const query = `SELECT * FROM albums WHERE id = '${id}'`;
+	const query = `SELECT * FROM albums WHERE uuid = '${uuid}'`;
 	db.query(query)
 		.then(albums => {
 			if (albums.rows.length == 0) { return response.json({ status: "error", error: "album,unavailable" }); }
@@ -29,16 +29,16 @@ router.get('/:id', (request, response, next) => {
 });
 
 
-router.post('/:id/delete', (request, response, next) => {
+router.post('/:uuid/delete', (request, response, next) => {
 	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
-	const id = request.params.id;
+	const uuid = request.params.uuid;
 	const user_id = request.session.user.id;
-	const query_check = `SELECT * FROM albums WHERE id = '${id}' AND user_id = '${user_id}'`;
+	const query_check = `SELECT * FROM albums WHERE uuid = '${uuid}' AND user_id = '${user_id}'`;
 	db.query(query_check)
 		.then(albums => {
 			if (albums.rows.length == 0) { return response.json({ status: "error", error: "album,unavailable" }); }
 			const album = albums.rows[0];
-			const query_delete = `DELETE albums WHERE id = '${id}' AND user_id = '${user_id}'`;
+			const query_delete = `DELETE albums WHERE id = '${album.id}' AND user_id = '${user_id}'`;
 			db.query(query_delete)
 				.then(() => {
 					// TODO: Delete all photos inside
@@ -53,16 +53,17 @@ router.post('/:id/delete', (request, response, next) => {
 });
 
 
-router.post('/:id/update', (request, response, next) => {
+router.post('/:uuid/update', (request, response, next) => {
 	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { caption, private, title } = request.body;
-	const id = request.params.id;
+	const uuid = request.params.uuid;
 	const user_id = request.session.user.id;
-	const query_check = `SELECT * FROM albums WHERE id = '${id}' AND user_id = '${user_id}'`;
+	const query_check = `SELECT * FROM albums WHERE uuid = '${uuid}' AND user_id = '${user_id}'`;
 	db.query(query_check)
 		.then(albums => {
 			if (albums.rows.length == 0) { return response.json({ status: "error", error: "album,unavailable" }); }
-			const query_update = `UPDATE albums SET albums.title = '${title}', albums.caption = '${caption}', albums.private = '${private}' WHERE id = '${id}' AND user_id = '${user_id}'`;
+			const album = albums.rows[0];
+			const query_update = `UPDATE albums SET albums.title = '${title}', albums.caption = '${caption}', albums.private = '${private}' WHERE id = '${album.id}' AND user_id = '${user_id}'`;
 			db.query(query_update).then(() => { return response.json({ status: "ok" }); });
 		})
 		.catch(error => {
@@ -76,6 +77,7 @@ router.post('/create', (request, response, next) => {
 	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { caption, private, title } = request.body;
 	const user_id = request.session.user.id;
+	// TODO: Generate UUID
 	const query = `INSERT INTO albums(user_id, title, caption, private) VALUES('${user_id}', '${title}', '${caption}', '${private}') RETURNING *`;
 	db.query(query)
 		.then(albums => {
