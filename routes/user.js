@@ -13,9 +13,9 @@ const fn = require('../server/functions');
 
 
 router.get('/:id', (request, response, next) => {
+	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const id = request.params.id;
 	const user_id = request.session.user.id;
-	if (user_id == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const query = `SELECT email, firstname, lastname FROM users WHERE id = '${id}'`;
 	db.query(query_check)
 		.then(users => {
@@ -25,17 +25,17 @@ router.get('/:id', (request, response, next) => {
 		})
 		.catch(error => {
 			console.error(error.stack);
-	        return response.json({ status: "error", error: "database" });
+			return response.json({ status: "error", error: "database" });
 		});
 });
 
 
 router.put('/update', (request, response, next) => {
+	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { email, firstname, lastname, passconf, password } = request.body;
 	const id = request.session.user.id;
 	var update_email = '';
 	var update_password = '';
-	if (id == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	if (fn.isEmpty(email) || fn.isEmpty(firstname) || fn.isEmpty(lastname)) { return response.json({ status: "error", error: "empty" }); }
 	if (!fn.isEmpty(password)) {
 		if (password != passconf) { return response.json({ status: "error", error: "password,mismatch" }); }
@@ -51,20 +51,24 @@ router.put('/update', (request, response, next) => {
 			if (users.rows.length > 0) { return response.json({ status: "error", error: "email,taken" }); }
 			db.query(query_update)
 				.then(() => {
-					// TODO: Destroy old session
+					request.session.destroy();
+					request.session.user = {
+						id: user.id,
+						email: email
+					};
 					return response.json({ status: "ok" });
 				});
 		})
 		.catch(error => {
 			console.error(error.stack);
-	        return response.json({ status: "error", error: "database" });
+			return response.json({ status: "error", error: "database" });
 		});
 });
 
 
 router.post('/login', (request, response, next) => {
 	const { email, password } = request.body;
-	if (email == null || password == "") { return response.json({ status: "error", error: "input" }); }
+	if (email == "" || password == "") { return response.json({ status: "error", error: "input" }); }
 	const query = `SELECT * FROM users WHERE email = '${email}'`;
 	db.query(query)
 		.then(users => {
@@ -81,7 +85,7 @@ router.post('/login', (request, response, next) => {
 		})
 		.catch(error => {
 			console.error(error.stack);
-	        return response.json({ status: "error", error: "database" });
+			return response.json({ status: "error", error: "database" });
 		});
 });
 
@@ -100,7 +104,7 @@ router.post('/logout', async(request, response) => {
 
 router.post('/register', (request, response, next) => {
 	const { email, firstname, lastname, password } = request.body;
-	if (email == null || firstname == null || lastname == null || password == null) { return response.json({ status: "error", error: "null" }); }
+	if (email == "" || firstname == "" || lastname == "" || password == "") { return response.json({ status: "error", error: "null" }); }
 	// TODO: Check password requirements
 	const password_hashed = bcrypt.hashSync(password, 10);
 	const query_check = `SELECT * FROM users WHERE email = '${email}'`

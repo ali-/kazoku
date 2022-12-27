@@ -17,7 +17,7 @@ const Login = () => {
 
 	const handleLogin = async(e) => {
 		e.preventDefault();
-		if (email == null || password == null) {
+		if (email == "" || password == "") {
 			setErrorMessage("Enter email and password");
 			return;
 		}
