@@ -17,17 +17,17 @@ const Login = () => {
 
 	const handleLogin = async(e) => {
 		e.preventDefault();
-		if (email == "" || password == "") {
+		if (email === "" || password === "") {
 			setErrorMessage("Enter email and password");
 			return;
 		}
 		setErrorMessage("");
 		const payload = { email: email, password: password };
 		const headers = { 'Content-Type': 'application/json' };
-		const response = await axios.post('http://localhost:3001/api/user/login', payload, { headers: headers });
+		const response = await axios.post('http://localhost:3001/api/user/login', payload, { headers: headers, withCredentials: true });
 		const data = response.data;
-		if (data.status == "error") { alert(`Error: ${data.error}`); }
-		else { setSuccess(true); }
+		if (data.status === "error") { alert(`Error: ${data.error}`); }
+		else { setSuccess(true); alert(`Status: ${data.status}`); }
 	};
 
 	return (

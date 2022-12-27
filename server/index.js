@@ -2,7 +2,7 @@ const cors = require('cors');
 const db = require('./database');
 const express = require('express');
 const session = require('express-session');
-const pg_session = require('connect-pg-simple')(session);
+const pg_session = require('express-pg-session')(session);
 const path = require('path');
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -10,7 +10,13 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cors())
+app.use(
+	cors({
+		origin: "http://localhost:3000",
+	    methods: ["POST", "GET"],
+	    credentials: true
+	})
+);
 
 
 const pool = require('../server/database');
@@ -18,7 +24,12 @@ const store = new pg_session({ pool: pool, createTableIfMissing: false });
 app.use(
 	session({
 		store: store,
-		cookie: { maxAge: 1000 * 60 * 60 * 24 },
+		cookie: {
+			httpOnly: false,
+			maxAge: 1000 * 60 * 60 * 24,
+			sameSite: false,
+			secure: false
+		},
 		secret: 'secret',
 		resave: false,
 		saveUninitialized: false

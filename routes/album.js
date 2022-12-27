@@ -2,6 +2,7 @@ const { response } = require('express');
 const express = require('express');
 const router = express.Router();
 const db = require('../server/database');
+const { v4: generate_uuid } = require("uuid");
 
 // -----------------------------------------------------------------------------
 // Albums
@@ -11,7 +12,7 @@ const db = require('../server/database');
 
 
 router.get('/:uuid', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const uuid = request.params.uuid;
 	const user_id = request.session.user.id;
 	const query = `SELECT * FROM albums WHERE uuid = '${uuid}'`;
@@ -30,7 +31,7 @@ router.get('/:uuid', (request, response, next) => {
 
 
 router.post('/:uuid/delete', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const uuid = request.params.uuid;
 	const user_id = request.session.user.id;
 	const query_check = `SELECT * FROM albums WHERE uuid = '${uuid}' AND user_id = '${user_id}'`;
@@ -54,7 +55,7 @@ router.post('/:uuid/delete', (request, response, next) => {
 
 
 router.post('/:uuid/update', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { caption, private, title } = request.body;
 	const uuid = request.params.uuid;
 	const user_id = request.session.user.id;
@@ -74,10 +75,10 @@ router.post('/:uuid/update', (request, response, next) => {
 
 
 router.post('/create', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { caption, private, title } = request.body;
 	const user_id = request.session.user.id;
-	// TODO: Generate UUID
+	const uuid = generate_uuid();
 	const query = `INSERT INTO albums(user_id, title, caption, private) VALUES('${user_id}', '${title}', '${caption}', '${private}') RETURNING *`;
 	db.query(query)
 		.then(albums => {

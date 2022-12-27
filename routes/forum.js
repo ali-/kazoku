@@ -19,7 +19,7 @@ const db = require('../server/database');
 
 
 router.get('/', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const query = `SELECT * FROM threads`;
 	db.query(query)
 		.then(threads => {
@@ -35,7 +35,7 @@ router.get('/', (request, response, next) => {
 
 router.get('/thread/:id', (request, response, next) => {
 	// TODO: Pagination
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { page } = request.query;
 	const id = request.params.id;
 	const query_thread = `SELECT * FROM threads WHERE id = '${id}'`;
@@ -56,7 +56,7 @@ router.get('/thread/:id', (request, response, next) => {
 
 
 router.post('/thread/:id/delete', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const id = request.params.id;
 	const user_id = request.session.user.id;
 	const query_thread = `SELECT * FROM threads WHERE id = '${id}' AND user_id = '${user_id}'`;
@@ -79,7 +79,7 @@ router.post('/thread/:id/delete', (request, response, next) => {
 
 
 router.post('/thread/:id/favorite', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const id = request.params.id;
 	const user_id = request.session.user.id;
 	const query_threads = `SELECT * FROM threads WHERE id = '${id}'`;
@@ -101,7 +101,7 @@ router.post('/thread/:id/favorite', (request, response, next) => {
 
 
 router.post('/thread/:id/reply', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { content } = request.body;
 	const id = request.params.id;
 	const user_id = request.session.user.id;
@@ -119,7 +119,7 @@ router.post('/thread/:id/reply', (request, response, next) => {
 
 
 router.put('/thread/:id/update', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { title, content } = request.body;
 	const id = request.params.id;
 	const user_id = request.session.user.id;
@@ -138,7 +138,7 @@ router.put('/thread/:id/update', (request, response, next) => {
 
 
 router.post('/thread/create', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { title, content } = request.body;
 	const id = request.params.id;
 	const user_id = request.session.user.id;
@@ -156,7 +156,7 @@ router.post('/thread/create', (request, response, next) => {
 
 
 router.post('/post/:id/delete', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const id = request.params.id;
 	const user_id = request.session.user.id;
 	const query_post = `SELECT * FROM thread_posts WHERE id = '${id}' AND user_id = '${user_id}'`;
@@ -179,7 +179,7 @@ router.post('/post/:id/delete', (request, response, next) => {
 
 
 router.post('/post/:id/update', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { content } = request.body;
 	const id = request.params.id;
 	const user_id = request.session.user.id;

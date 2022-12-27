@@ -2,6 +2,7 @@ const { response } = require('express');
 const express = require('express');
 const router = express.Router();
 const db = require('../server/database');
+const { v4: generate_uuid } = require("uuid");
 
 // -----------------------------------------------------------------------------
 // Photos
@@ -22,7 +23,7 @@ const db = require('../server/database');
 
 
 router.get('/:uuid', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const uuid = request.params.uuid;
 	const user_id = request.session.user.id;
 	const query_photo = `SELECT * FROM photos WHERE uuid = '${uuid}'`;
@@ -46,7 +47,7 @@ router.get('/:uuid', (request, response, next) => {
 
 
 router.post('/:uuid/comment', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { album, comment } = request.body;
 	const uuid = request.params.uuid;
 	const user_id = request.session.user.id;
@@ -78,7 +79,7 @@ router.post('/:uuid/comment', (request, response, next) => {
 
 
 router.post('/:uuid/delete', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const uuid = request.params.uuid;
 	const user_id = request.session.user.id;
 	const query_check = `SELECT * FROM photos WHERE uuid = '${uuid}' AND user_id = '${user_id}'`;
@@ -101,7 +102,7 @@ router.post('/:uuid/delete', (request, response, next) => {
 
 
 router.post('/:uuid/favorite', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { album } = request.body;
 	const uuid = request.params.uuid;
 	const user_id = request.session.user.id;
@@ -133,7 +134,7 @@ router.post('/:uuid/favorite', (request, response, next) => {
 
 
 router.post('/:uuid/update', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { caption, private } = request.body;
 	const uuid = request.params.uuid;
 	const user_id = request.session.user.id;
@@ -154,7 +155,7 @@ router.post('/:uuid/update', (request, response, next) => {
 
 router.post('/create', (request, response, next) => {
 	// TODO: In the case where no album ID is provided, should be uploaded to users misc. uploads
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { album, caption, private, title } = request.body;
 	const user_id = request.session.user.id;
 	const query_album = `SELECT * FROM albums WHERE id = '${album}' AND user_id = '${user_id}'`;
@@ -162,7 +163,7 @@ router.post('/create', (request, response, next) => {
 		.then(albums => {
 			// Check here if album id != 0?
 			if (albums.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
-			// TODO: Generate UUID
+			const uuid = generate_uuid();
 			const query_insert = `INSERT INTO photos(user_id, album_id, caption, private) VALUES('${user_id}', '${album}', '${caption}', '${private}') RETURNING *`;
 			db.query(query_insert)
 				.then(photos => {

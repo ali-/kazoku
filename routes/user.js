@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../server/database');
 const fn = require('../server/functions');
+const { v4: generate_uuid } = require("uuid");
 
 // -----------------------------------------------------------------------------
 // User
@@ -13,11 +14,11 @@ const fn = require('../server/functions');
 
 
 router.get('/:uuid', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const uuid = request.params.uuid;
 	const user_id = request.session.user.id;
 	const query = `SELECT email, firstname, lastname FROM users WHERE uuid = '${uuid}'`;
-	db.query(query_check)
+	db.query(query)
 		.then(users => {
 			if (users.rows.length === 0) { return response.json({ status: "error", error: "empty" }); }
 			const user = users.rows[0];
@@ -31,7 +32,7 @@ router.get('/:uuid', (request, response, next) => {
 
 
 router.post('/:uuid/update', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { email, firstname, lastname, passconf, password } = request.body;
 	const id = request.session.user.id;
 	var update_email = '';
@@ -111,8 +112,9 @@ router.post('/register', (request, response, next) => {
 	db.query(query_check)
 		.then(users => {
 			if (users.rows.length > 0) { return response.json({ status: "error", error: "email" }); }
-			// TODO: Generate UUID
-			const query_insert = `INSERT INTO users(email, firstname, lastname, password) VALUES('${email}', '${firstname}', '${lastname}', '${password_hashed}') RETURNING *`;
+			const uuid = generate_uuid();
+			const query_insert = `INSERT INTO users(uuid, email, firstname, lastname, password) VALUES('${uuid}', '${email}', '${firstname}', '${lastname}', '${password_hashed}') RETURNING *`;
+			console.log(query_insert);
 			db.query(query_insert)
 				.then(results => {
 					const user = results.rows[0];
