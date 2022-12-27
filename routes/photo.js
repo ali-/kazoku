@@ -21,29 +21,6 @@ const db = require('../server/database');
 // TODO: Image uploading
 
 
-router.delete('/:id', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
-	const id = request.params.id;
-	const user_id = request.session.user.id;
-	const query_check = `SELECT * FROM photos WHERE id = '${id}' AND user_id = '${user_id}'`;
-	db.query(query_check)
-		.then(photos => {
-			if (photos.rows.length == 0) { return response.json({ status: "error", error: "photo,unavailable" }); }
-			const photo = photos.rows[0];
-			const query_delete = `DELETE photos WHERE id = '${id}' AND user_id = '${user_id}'`;
-			db.query(query_delete)
-				.then(() => {
-					console.log(`Photo ${photo.id} deleted`);
-					return response.json({ status: "ok" });
-				});
-		})
-		.catch(error => {
-			console.error(error.stack);
-	        return response.json({ status: "error", error: "database" });
-		});
-});
-
-
 router.get('/:id', (request, response, next) => {
 	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const id = request.params.id;
@@ -60,25 +37,6 @@ router.get('/:id', (request, response, next) => {
 					if ((album.private === true || photo.private === true) && album.user_id != user_id) { return response.json({ status: "error", error: "denied" }); }
 					return response.json({ photo: photo, status: "ok" });
 				});
-		})
-		.catch(error => {
-			console.error(error.stack);
-	        return response.json({ status: "error", error: "database" });
-		});
-});
-
-
-router.put('/:id', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
-	const { caption, private } = request.body;
-	const id = request.params.id;
-	const user_id = request.session.user.id;
-	const query_check = `SELECT * FROM photos WHERE id = '${id}' AND user_id = '${user_id}'`;
-	db.query(query_check)
-		.then(photos => {
-			if (photos.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
-			const query_update = `UPDATE photos SET photos.caption = '${caption}', photos.private = '${private}' WHERE id = '${id}' AND user_id = '${user_id}'`;
-			db.query(query_update).then(() => { return response.json({ status: "ok" }); });
 		})
 		.catch(error => {
 			console.error(error.stack);
@@ -119,6 +77,29 @@ router.post('/:id/comment', (request, response, next) => {
 });
 
 
+router.post('/:id/delete', (request, response, next) => {
+	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	const id = request.params.id;
+	const user_id = request.session.user.id;
+	const query_check = `SELECT * FROM photos WHERE id = '${id}' AND user_id = '${user_id}'`;
+	db.query(query_check)
+		.then(photos => {
+			if (photos.rows.length == 0) { return response.json({ status: "error", error: "photo,unavailable" }); }
+			const photo = photos.rows[0];
+			const query_delete = `DELETE photos WHERE id = '${id}' AND user_id = '${user_id}'`;
+			db.query(query_delete)
+				.then(() => {
+					console.log(`Photo ${photo.id} deleted`);
+					return response.json({ status: "ok" });
+				});
+		})
+		.catch(error => {
+			console.error(error.stack);
+	        return response.json({ status: "error", error: "database" });
+		});
+});
+
+
 router.post('/:id/favorite', (request, response, next) => {
 	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { album } = request.body;
@@ -143,6 +124,25 @@ router.post('/:id/favorite', (request, response, next) => {
 					console.log(`Favorited photo ${id}`);
 					return response.json({ status: "ok" });
 				});
+		})
+		.catch(error => {
+			console.error(error.stack);
+	        return response.json({ status: "error", error: "database" });
+		});
+});
+
+
+router.post('/:id/update', (request, response, next) => {
+	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	const { caption, private } = request.body;
+	const id = request.params.id;
+	const user_id = request.session.user.id;
+	const query_check = `SELECT * FROM photos WHERE id = '${id}' AND user_id = '${user_id}'`;
+	db.query(query_check)
+		.then(photos => {
+			if (photos.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
+			const query_update = `UPDATE photos SET photos.caption = '${caption}', photos.private = '${private}' WHERE id = '${id}' AND user_id = '${user_id}'`;
+			db.query(query_update).then(() => { return response.json({ status: "ok" }); });
 		})
 		.catch(error => {
 			console.error(error.stack);
