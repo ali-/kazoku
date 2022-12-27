@@ -10,7 +10,26 @@ const db = require('../server/database');
 // ----------------------------------------------------------------------
 
 
-router.delete('/:id', (request, response, next) => {
+router.get('/:id', (request, response, next) => {
+	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	const id = request.params.id;
+	const user_id = request.session.user.id;
+	const query = `SELECT * FROM albums WHERE id = '${id}'`;
+	db.query(query)
+		.then(albums => {
+			if (albums.rows.length == 0) { return response.json({ status: "error", error: "album,unavailable" }); }
+			const album = albums.rows[0];
+			if (album.private === true && album.user_id != user_id) { return response.json({ status: "error", error: "album,private" }); }
+			return response.json({ albums: albums.rows, status: "ok" });
+		})
+		.catch(error => {
+			console.error(error.stack);
+	        return response.json({ status: "error", error: "database" });
+		});
+});
+
+
+router.post('/:id/delete', (request, response, next) => {
 	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const id = request.params.id;
 	const user_id = request.session.user.id;
@@ -34,26 +53,7 @@ router.delete('/:id', (request, response, next) => {
 });
 
 
-router.get('/:id', (request, response, next) => {
-	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
-	const id = request.params.id;
-	const user_id = request.session.user.id;
-	const query = `SELECT * FROM albums WHERE id = '${id}'`;
-	db.query(query)
-		.then(albums => {
-			if (albums.rows.length == 0) { return response.json({ status: "error", error: "album,unavailable" }); }
-			const album = albums.rows[0];
-			if (album.private === true && album.user_id != user_id) { return response.json({ status: "error", error: "album,private" }); }
-			return response.json({ albums: albums.rows, status: "ok" });
-		})
-		.catch(error => {
-			console.error(error.stack);
-	        return response.json({ status: "error", error: "database" });
-		});
-});
-
-
-router.put('/:id', (request, response, next) => {
+router.post('/:id/update', (request, response, next) => {
 	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { caption, private, title } = request.body;
 	const id = request.params.id;
