@@ -22,10 +22,10 @@ const db = require('../server/database');
 
 
 router.delete('/:id', (request, response, next) => {
+	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const id = request.params.id;
 	const user_id = request.session.user.id;
 	const query_check = `SELECT * FROM photos WHERE id = '${id}' AND user_id = '${user_id}'`;
-	if (user_id == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	db.query(query_check)
 		.then(photos => {
 			if (photos.rows.length == 0) { return response.json({ status: "error", error: "photo,unavailable" }); }
@@ -36,6 +36,7 @@ router.delete('/:id', (request, response, next) => {
 					console.log(`Photo ${photo.id} deleted`);
 					return response.json({ status: "ok" });
 				});
+		})
 		.catch(error => {
 			console.error(error.stack);
 	        return response.json({ status: "error", error: "database" });
@@ -44,10 +45,10 @@ router.delete('/:id', (request, response, next) => {
 
 
 router.get('/:id', (request, response, next) => {
+	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const id = request.params.id;
 	const user_id = request.session.user.id;
 	const query_photo = `SELECT * FROM photos WHERE id = '${id}'`;
-	if (user_id == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	db.query(query_photo)
 		.then(photos => {
 			if (photos.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
@@ -68,11 +69,11 @@ router.get('/:id', (request, response, next) => {
 
 
 router.put('/:id', (request, response, next) => {
+	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { caption, private } = request.body;
 	const id = request.params.id;
 	const user_id = request.session.user.id;
 	const query_check = `SELECT * FROM photos WHERE id = '${id}' AND user_id = '${user_id}'`;
-	if (user_id == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	db.query(query_check)
 		.then(photos => {
 			if (photos.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
@@ -87,12 +88,12 @@ router.put('/:id', (request, response, next) => {
 
 
 router.post('/:id/comment', (request, response, next) => {
+	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { album, comment } = request.body;
 	const id = request.params.id;
 	const user_id = request.session.user.id;
 	const query_album = `SELECT * FROM albums WHERE id = '${album}'`;
 	const query_photo = `SELECT * FROM photos WHERE id = '${id}'`;
-	if (user_id == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	db.query(query_album)
 		.then(albums => {
 			return Promise.all([albums, db.query(query_photo)]);
@@ -119,12 +120,12 @@ router.post('/:id/comment', (request, response, next) => {
 
 
 router.post('/:id/favorite', (request, response, next) => {
+	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { album } = request.body;
 	const id = request.params.id;
 	const user_id = request.session.user.id;
 	const query_album = `SELECT * FROM albums WHERE id = '${album}'`;
 	const query_photo = `SELECT * FROM photos WHERE id = '${id}'`;
-	if (user_id == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	db.query(query_album)
 		.then(albums => {
 			return Promise.all([albums, db.query(query_photo)]);
@@ -152,10 +153,10 @@ router.post('/:id/favorite', (request, response, next) => {
 
 router.post('/create', (request, response, next) => {
 	// TODO: In the case where no album ID is provided, should be uploaded to users misc. uploads
+	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { album, caption, private, title } = request.body;
 	const user_id = request.session.user.id;
 	const query_album = `SELECT * FROM albums WHERE id = '${album}' AND user_id = '${user_id}'`;
-	if (user_id == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	db.query(query_album)
 		.then(albums => {
 			// Check here if album id != 0?

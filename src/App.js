@@ -3,12 +3,14 @@ import Login from "./Login";
 import Photo from "./Photo";
 import Register from "./Register";
 
+
 function App() {
 	return (
 		<main className="App">
-			<Photo/>
+			<Login/>
 		</main>
 	);
 }
+
 
 export default App;

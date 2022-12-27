@@ -7,9 +7,11 @@ const path = require('path');
 const PORT = process.env.PORT || 3001;
 const app = express();
 
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors())
+
 
 const pool = require('../server/database');
 const store = new pg_session({ pool: pool, createTableIfMissing: false });
@@ -23,6 +25,7 @@ app.use(
 	})
 );
 
+
 const album_router = require('../routes/album');
 const forum_router = require('../routes/forum');
 const photo_router = require('../routes/photo');
@@ -31,6 +34,7 @@ app.use('/api/album', album_router);
 app.use('/api/forum', forum_router);
 app.use('/api/photo', photo_router);
 app.use('/api/user', user_router);
+
 
 app.listen(PORT, function() {
 	console.log(`Server is running on port ${PORT}:`);

@@ -19,9 +19,9 @@ const db = require('../server/database');
 
 
 router.get('/', (request, response, next) => {
+	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const user_id = request.session.user.id;
 	const query = `SELECT * FROM threads`;
-	if (user_id == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	db.query(query)
 		.then(threads => {
 			if (threads.rows.length == 0) { return response.json({ status: "error", error: "empty" }) }
@@ -36,11 +36,12 @@ router.get('/', (request, response, next) => {
 
 router.get('/thread/:id', (request, response, next) => {
 	// TODO: Pagination
+	if (request.session.user === null) { return response.json({ status: "error", error: "session,invalid" }); }
+	const { page } = request.query;
 	const id = request.params.id;
 	const user_id = request.session.user.id;
 	const query_thread = `SELECT * FROM threads WHERE id = '${id}'`;
 	const query_posts = `SELECT * FROM thread_posts WHERE thread_id = '${id}' ORDER BY id ASC`;
-	if (user_id == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	db.query(query_thread)
 		.then(threads => {
 			if (threads.rows.length == 0) { return response.json({ status: "error", error: "empty" }) }
