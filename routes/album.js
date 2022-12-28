@@ -2,13 +2,7 @@ const { response } = require('express');
 const express = require('express');
 const router = express.Router();
 const db = require('../server/database');
-const { v4: generate_uuid } = require("uuid");
-
-// -----------------------------------------------------------------------------
-// Albums
-// id: int, uuid: uuid, user_id: int, title: varchar, caption: text
-// private: boolean, created_at: datetime, updated_at: datetime
-// -----------------------------------------------------------------------------
+const { v4: generate_uuid } = require('uuid');
 
 
 router.get('/:uuid', (request, response, next) => {
@@ -79,7 +73,7 @@ router.post('/create', (request, response, next) => {
 	const { caption, private, title } = request.body;
 	const user_id = request.session.user.id;
 	const uuid = generate_uuid();
-	const query = `INSERT INTO albums(user_id, title, caption, private) VALUES('${user_id}', '${title}', '${caption}', '${private}') RETURNING *`;
+	const query = `INSERT INTO albums(uuid, user_id, title, caption, private) VALUES('${uuid}', '${user_id}', '${title}', '${caption}', '${private}') RETURNING *`;
 	db.query(query)
 		.then(albums => {
 			const album = albums.rows[0];

@@ -3,20 +3,6 @@ const express = require('express');
 const router = express.Router();
 const db = require('../server/database');
 
-// -----------------------------------------------------------------------------
-// Threads
-// id: int, user_id: int, title: varchar, content: text, locked: boolean
-// created_at: datetime, updated_at: datetime
-// -----------------------------------------------------------------------------
-// Thread_Favorites
-// id: int, user_id: int, thread_id: int
-// created_at: datetime, updated_at: datetime
-// -----------------------------------------------------------------------------
-// Thread_Posts
-// id: int, user_id: int, thread_id: int, content: text
-// created_at: datetime, updated_at: datetime
-// -----------------------------------------------------------------------------
-
 
 router.get('/', (request, response, next) => {
 	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }

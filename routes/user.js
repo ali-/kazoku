@@ -4,13 +4,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../server/database');
 const fn = require('../server/functions');
-const { v4: generate_uuid } = require("uuid");
-
-// -----------------------------------------------------------------------------
-// User
-// id: int, uuid: uuid, email: varchar, firstname: varchar, lastname: varchar
-// password: varchar, created_at: datetime, updated_at: datetime
-// -----------------------------------------------------------------------------
+const { v4: generate_uuid } = require('uuid');
 
 
 router.get('/:uuid', (request, response, next) => {

@@ -1,26 +1,19 @@
 const { response } = require('express');
 const express = require('express');
+const multer = require('multer');
 const router = express.Router();
+const sharp = require('sharp');
 const db = require('../server/database');
-const { v4: generate_uuid } = require("uuid");
-
-// -----------------------------------------------------------------------------
-// Photos
-// id: int, uuid: uuid, user_id: int, album_id: int, caption: text
-// private: boolean, date: datetime, created_at: datetime, updated_at: datetime
-// -----------------------------------------------------------------------------
-// Photo_Comments
-// id: int, user_id: int, photo_id: int, comment: text
-// created_at: datetime, updated_at: datetime
-// -----------------------------------------------------------------------------
-// Photo_Favorites
-// id: int, user_id: int, photo_id: int
-// created_at: datetime, updated_at: datetime
-// -----------------------------------------------------------------------------
-
-
-// TODO: Image uploading
-
+const { v4: generate_uuid } = require('uuid');
+const upload = multer({
+	limits: { fileSize: 10000000 }, // 10MB
+	fileFilter(request, file, cb) {
+		if (!file.originalname.match(/\.(jpg|jpeg)$/)) {
+			return cb( new Error('Please upload a valid image file') );
+		}
+		cb(undefined, true);
+	}
+});
 
 router.get('/:uuid', (request, response, next) => {
 	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
@@ -153,22 +146,36 @@ router.post('/:uuid/update', (request, response, next) => {
 });
 
 
-router.post('/create', (request, response, next) => {
+router.post('/create', upload.single('upload'), (request, response, next) => {
 	// TODO: In the case where no album ID is provided, should be uploaded to users misc. uploads
-	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
-	const { album, caption, private, title } = request.body;
-	const user_id = request.session.user.id;
+	//if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
+	//const { album, caption, private, title } = request.body;
+	const user_id = 1;
+	const album = 1;
+	const caption = request.body.caption;
+	const private = false;
+	const title = 'test';
 	const query_album = `SELECT * FROM albums WHERE id = '${album}' AND user_id = '${user_id}'`;
 	db.query(query_album)
 		.then(albums => {
 			// Check here if album id != 0?
-			if (albums.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
+			//if (albums.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
 			const uuid = generate_uuid();
-			const query_insert = `INSERT INTO photos(user_id, album_id, caption, private) VALUES('${user_id}', '${album}', '${caption}', '${private}') RETURNING *`;
+			const query_insert = `INSERT INTO photos(uuid, user_id, album_id, caption, private) VALUES('${uuid}', '${user_id}', '${album}', '${caption}', '${private}') RETURNING *`;
 			db.query(query_insert)
 				.then(photos => {
 					const photo = photos.rows[0];
-					return response.json({ photo_id: photo.id, status: "ok" });
+					const { dirname } = require('path');
+					const appDir = dirname(require.main.filename).replace('/server','');
+					sharp(request.file.buffer)
+						.resize(4000, 3000, { fit: 'inside', withoutEnlargement: true })
+						.jpeg({ quality: 80 })
+						.toFile(appDir + `/images/${uuid}.jpeg`)
+						.then(() => {
+							// TODO: Create thumbnail
+							return response.json({ photo_id: photo.id, status: "ok" });
+						});
+
 				});
 		})
 		.catch(error => {

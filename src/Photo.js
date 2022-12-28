@@ -1,43 +1,51 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import axios from 'axios';
 import strings from './localization/en.json';
 
 
 const Photo = () => {
-	const captionRef = useRef();
-	const errorRef = useRef();
 	const [caption, setCaption] = useState('');
-	const [errorMessage, setErrorMessage] = useState('');
-	const [success, setSuccess] = useState(false);
+	const [upload, setUpload] = useState()
 
-	useEffect(() => {
-		captionRef.current.focus();
-	}, []);
+	function handleChange(event) {
+		setUpload(event.target.files[0]);
+	};
 
-	const handlePhoto = async(e) => {
-		e.preventDefault();
-		alert("Uploading photo");
+	const handlePhoto = (event) => {
+		event.preventDefault();
+		const payload = new FormData();
+		payload.append('upload', upload);
+		payload.append('caption', caption);
+		const headers = { 'content-type': 'multipart/form-data' };
+		axios.post('http://localhost:3001/api/photo/create', payload, { headers: headers, withCredentials: true })
+			.then((response) => {
+				const data = response.data;
+				if (data.status === "error") { alert(`Error: ${data.error}`); }
+				else { alert(`Status: ${data.status}`); }
+			});
 	};
 
 	return (
 		<section>
-			<p ref={errorRef} className={errorMessage ? "errorMessage" : "offscreen"}>{errorMessage}</p>
 			<h2>{strings["upload"]}</h2>
-			<form onSubmit={handlePhoto} autoComplete="off">
-				<label htmlFor="caption">{strings["caption"]}:</label>
+			<form onSubmit={handlePhoto} autoComplete="off" enctype="multipart/form-data">
 				<input
 					type="text"
-					id="caption"
-					ref={captionRef}
+					value={caption}
 					onChange={(e) => setCaption(e.target.value)}
 					required
+				/>
+				<br/>
+				<input
+					type="file"
+					onChange={handleChange}
 				/>
 				<br/>
 				<button>{strings["upload"]}</button>
 			</form>
 		</section>
 	);
-}
+};
 
 
 export default Photo;
