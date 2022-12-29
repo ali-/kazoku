@@ -7,6 +7,21 @@ const { empty } = require('../server/functions');
 const { v4: generate_uuid } = require('uuid');
 
 
+router.get('/logout', (request, response, next) => {
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
+	request.session.destroy((error) => {
+		if (error == null) { return response.json({ status: "ok" }); }
+		return response.json({ status: "error", error: "session,destruction" });
+	});
+});
+
+
+router.get('/session', (request, response) => {
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
+	return response.json({ status: "ok" });
+});
+
+
 router.get('/:uuid', (request, response, next) => {
 	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const uuid = request.params.uuid;
@@ -85,19 +100,7 @@ router.post('/login', (request, response, next) => {
 });
 
 
-router.post('/logout', async(request, response) => {
-	try {
-		await request.session.destroy();
-		return response.json({ status: "ok" });
-	}
-	catch (error) {
-		console.error(error);
-		return response.json({ status: "error", error: "session,destruction" });
-	}
-});
-
-
-router.post('/register', (request, response, next) => {
+router.post('/register', async(request, response, next) => {
 	const { email, firstname, lastname, password } = request.body;
 	if (empty(email) || empty(firstname) || empty(lastname) || empty(password)) { return response.json({ status: "error", error: "null" }); }
 	// TODO: Check password requirements
