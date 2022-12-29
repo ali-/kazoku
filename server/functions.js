@@ -1,6 +1,6 @@
-function isEmpty(input) {
+function empty(input) {
 	return (input == "" || input == null) ? true : false;
 }
 
 
-module.exports = { isEmpty };
+module.exports = { empty };

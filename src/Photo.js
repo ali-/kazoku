@@ -13,11 +13,15 @@ const Photo = () => {
 
 	const handlePhoto = (event) => {
 		event.preventDefault();
+		const headers = { 'content-type': 'multipart/form-data' };
 		const payload = new FormData();
 		payload.append('upload', upload);
 		payload.append('caption', caption);
-		const headers = { 'content-type': 'multipart/form-data' };
-		axios.post('http://localhost:3001/api/photo/create', payload, { headers: headers, withCredentials: true })
+		axios
+			.post('http://localhost:3001/api/photo/create', payload, { 
+				headers: headers,
+				withCredentials: true
+			})
 			.then((response) => {
 				const data = response.data;
 				if (data.status === "error") { alert(`Error: ${data.error}`); }

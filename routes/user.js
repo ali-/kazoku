@@ -3,7 +3,7 @@ const { response } = require('express');
 const express = require('express');
 const router = express.Router();
 const db = require('../server/database');
-const fn = require('../server/functions');
+const { empty } = require('../server/functions');
 const { v4: generate_uuid } = require('uuid');
 
 
@@ -31,8 +31,8 @@ router.post('/:uuid/update', (request, response, next) => {
 	const id = request.session.user.id;
 	var update_email = '';
 	var update_password = '';
-	if (fn.isEmpty(email) || fn.isEmpty(firstname) || fn.isEmpty(lastname)) { return response.json({ status: "error", error: "empty" }); }
-	if (!fn.isEmpty(password)) {
+	if (empty(email) || empty(firstname) || empty(lastname)) { return response.json({ status: "error", error: "empty" }); }
+	if (!empty(password)) {
 		if (password != passconf) { return response.json({ status: "error", error: "password,mismatch" }); }
 		const password_hashed = bcrypt.hashSync(password, 10);
 		update_password = `, users.password = '${password_hashed}'`;
@@ -63,7 +63,7 @@ router.post('/:uuid/update', (request, response, next) => {
 
 router.post('/login', (request, response, next) => {
 	const { email, password } = request.body;
-	if (email == "" || password == "") { return response.json({ status: "error", error: "input" }); }
+	if (empty(email) || empty(password)) { return response.json({ status: "error", error: "input" }); }
 	const query = `SELECT * FROM users WHERE email = '${email}'`;
 	db.query(query)
 		.then(users => {
@@ -99,7 +99,7 @@ router.post('/logout', async(request, response) => {
 
 router.post('/register', (request, response, next) => {
 	const { email, firstname, lastname, password } = request.body;
-	if (email == "" || firstname == "" || lastname == "" || password == "") { return response.json({ status: "error", error: "null" }); }
+	if (empty(email) || empty(firstname) || empty(lastname) || empty(password)) { return response.json({ status: "error", error: "null" }); }
 	// TODO: Check password requirements
 	const password_hashed = bcrypt.hashSync(password, 10);
 	const query_check = `SELECT * FROM users WHERE email = '${email}'`

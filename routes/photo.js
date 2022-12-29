@@ -147,19 +147,13 @@ router.post('/:uuid/update', (request, response, next) => {
 
 
 router.post('/create', upload.single('upload'), (request, response, next) => {
-	// TODO: In the case where no album ID is provided, should be uploaded to users misc. uploads
-	//if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
-	//const { album, caption, private, title } = request.body;
-	const user_id = 1;
-	const album = 1;
-	const caption = request.body.caption;
-	const private = false;
-	const title = 'test';
+	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
+	const { album, caption, private } = request.body;
+	const user_id = request.session.user.id;
 	const query_album = `SELECT * FROM albums WHERE id = '${album}' AND user_id = '${user_id}'`;
 	db.query(query_album)
 		.then(albums => {
-			// Check here if album id != 0?
-			//if (albums.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
+			if (album != 0 && albums.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
 			const uuid = generate_uuid();
 			const query_insert = `INSERT INTO photos(uuid, user_id, album_id, caption, private) VALUES('${uuid}', '${user_id}', '${album}', '${caption}', '${private}') RETURNING *`;
 			db.query(query_insert)
@@ -170,7 +164,7 @@ router.post('/create', upload.single('upload'), (request, response, next) => {
 					sharp(request.file.buffer)
 						.resize(4000, 3000, { fit: 'inside', withoutEnlargement: true })
 						.jpeg({ quality: 80 })
-						.toFile(appDir + `/images/${uuid}.jpeg`)
+						.toFile(appDir + `${process.env.PHOTO_DIRECTORY}/${uuid}.jpeg`)
 						.then(() => {
 							// TODO: Create thumbnail
 							return response.json({ photo_id: photo.id, status: "ok" });

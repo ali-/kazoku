@@ -7,6 +7,10 @@ import Register from "./Register";
 function App() {
 	return (
 		<main className="App">
+			<Login/>
+			<br/>
+			<Register/>
+			<br/>
 			<Photo/>
 		</main>
 	);
