@@ -32,7 +32,7 @@ CREATE TABLE photos (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     uuid uuid UNIQUE,
     user_id integer REFERENCES users(id),
-    album_id integer REFERENCES albums(id),
+    album_id integer,
     caption character varying(300),
     private boolean,
     date date,
