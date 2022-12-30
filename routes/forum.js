@@ -81,7 +81,7 @@ router.post('/thread/:id/favorite', (request, response, next) => {
 		})
 		.catch(error => {
 			console.error(error.stack);
-	        return response.json({ status: "error", error: "database" });
+			return response.json({ status: "error", error: "database" });
 		});
 });
 
@@ -99,7 +99,7 @@ router.post('/thread/:id/reply', (request, response, next) => {
 		})
 		.catch(error => {
 			console.error(error.stack);
-	        return response.json({ status: "error", error: "database" });
+			return response.json({ status: "error", error: "database" });
 		});
 });
 
@@ -118,7 +118,7 @@ router.put('/thread/:id/update', (request, response, next) => {
 		})
 		.catch(error => {
 			console.error(error.stack);
-	        return response.json({ status: "error", error: "database" });
+			return response.json({ status: "error", error: "database" });
 		});
 });
 
@@ -136,7 +136,7 @@ router.post('/thread/create', (request, response, next) => {
 		})
 		.catch(error => {
 			console.error(error.stack);
-	        return response.json({ status: "error", error: "database" });
+			return response.json({ status: "error", error: "database" });
 		});
 });
 
@@ -178,7 +178,7 @@ router.post('/post/:id/update', (request, response, next) => {
 		})
 		.catch(error => {
 			console.error(error.stack);
-	        return response.json({ status: "error", error: "database" });
+			return response.json({ status: "error", error: "database" });
 		});
 });
 

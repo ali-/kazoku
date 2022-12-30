@@ -116,9 +116,9 @@ router.post('/register', async(request, response, next) => {
 				.then(results => {
 					const user = results.rows[0];
 					request.session.user = {
-			            id: user.id,
-			            email: user.email
-			        };
+						id: user.id,
+						email: user.email
+					};
 					console.log(request.session.user);
 					return response.json({ status: "ok" });
 				});

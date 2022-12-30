@@ -19,7 +19,7 @@ router.get('/:uuid', (request, response, next) => {
 		})
 		.catch(error => {
 			console.error(error.stack);
-	        return response.json({ status: "error", error: "database" });
+			return response.json({ status: "error", error: "database" });
 		});
 });
 
@@ -43,7 +43,7 @@ router.post('/:uuid/delete', (request, response, next) => {
 		})
 		.catch(error => {
 			console.error(error.stack);
-	        return response.json({ status: "error", error: "database" });
+			return response.json({ status: "error", error: "database" });
 		});
 });
 
@@ -63,7 +63,7 @@ router.post('/:uuid/update', (request, response, next) => {
 		})
 		.catch(error => {
 			console.error(error.stack);
-	        return response.json({ status: "error", error: "database" });
+			return response.json({ status: "error", error: "database" });
 		});
 });
 
@@ -81,7 +81,7 @@ router.post('/create', (request, response, next) => {
 		})
 		.catch(error => {
 			console.error(error.stack);
-	        return response.json({ status: "error", error: "database" });
+			return response.json({ status: "error", error: "database" });
 		});
 });
 

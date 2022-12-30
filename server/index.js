@@ -13,8 +13,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(
 	cors({
 		origin: process.env.ORIGIN_URL,
-	    methods: ["POST", "GET"],
-	    credentials: true
+		methods: ["POST", "GET"],
+		credentials: true
 	})
 );
 
