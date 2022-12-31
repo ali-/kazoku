@@ -24,16 +24,18 @@ router.get('/:uuid', (request, response, next) => {
 	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const uuid = request.params.uuid;
 	const user_id = request.session.user.id;
-	const query_photo = `SELECT * FROM photos WHERE uuid = '${uuid}'`;
+	const query_photo = `SELECT uuid, user_id, album_id, private, date, created_at, updated_at FROM photos WHERE uuid = '${uuid}'`;
 	db.query(query_photo)
 		.then(photos => {
 			if (photos.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
 			const photo = photos.rows[0];
-			const query_album = `SELECT * FROM albums WHERE id = '${photo.album_id}'`;
+			if (photo.user_id == user_id || (photo.album_id === 0 && photo.private === false)) { return response.json({ photo: photo, status: "ok" }); }
+			const query_album = `SELECT id, user_id, private FROM albums WHERE id = '${photo.album_id}'`;
 			db.query(query_album)
 				.then(albums => {
+					if (albums.rows.length === 0 && photo.album_id != 0) { return response.json({ status: "error", error: "unavailable" }); }
 					const album = albums.rows[0];
-					if ((album.private === true || photo.private === true) && album.user_id != user_id) { return response.json({ status: "error", error: "denied" }); }
+					if (album.private === true || photo.private === true) { return response.json({ status: "error", error: "denied" }); }
 					return response.json({ photo: photo, status: "ok" });
 				});
 		})
@@ -45,12 +47,13 @@ router.get('/:uuid', (request, response, next) => {
 
 
 router.post('/:uuid/comment', (request, response, next) => {
+	// TODO: Route needs to be checked and rewritten
 	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { album, comment } = request.body;
 	const uuid = request.params.uuid;
 	const user_id = request.session.user.id;
-	const query_album = `SELECT * FROM albums WHERE uuid = '${album}'`;
-	const query_photo = `SELECT * FROM photos WHERE uuid = '${uuid}'`;
+	const query_album = `SELECT id, user_id, uuid, private FROM albums WHERE uuid = '${album}'`;
+	const query_photo = `SELECT id, user_id, uuid, private FROM photos WHERE uuid = '${uuid}'`;
 	db.query(query_album)
 		.then(albums => {
 			return Promise.all([albums, db.query(query_photo)]);
@@ -80,7 +83,7 @@ router.post('/:uuid/delete', (request, response, next) => {
 	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const uuid = request.params.uuid;
 	const user_id = request.session.user.id;
-	const query_check = `SELECT * FROM photos WHERE uuid = '${uuid}' AND user_id = '${user_id}'`;
+	const query_check = `SELECT id, user_id, uuid FROM photos WHERE uuid = '${uuid}' AND user_id = '${user_id}'`;
 	db.query(query_check)
 		.then(photos => {
 			if (photos.rows.length == 0) { return response.json({ status: "error", error: "photo,unavailable" }); }
@@ -133,15 +136,15 @@ router.post('/:uuid/favorite', (request, response, next) => {
 
 router.post('/:uuid/update', (request, response, next) => {
 	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
-	const { caption, private } = request.body;
+	const { private } = request.body;
 	const uuid = request.params.uuid;
 	const user_id = request.session.user.id;
-	const query_check = `SELECT * FROM photos WHERE uuid = '${uuid}' AND user_id = '${user_id}'`;
+	const query_check = `SELECT id, uuid, user_id FROM photos WHERE uuid = '${uuid}' AND user_id = '${user_id}'`;
 	db.query(query_check)
 		.then(photos => {
 			if (photos.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
 			const photo = photos.rows[0];
-			const query_update = `UPDATE photos SET photos.caption = '${caption}', photos.private = '${private}' WHERE id = '${photo.id}' AND user_id = '${user_id}'`;
+			const query_update = `UPDATE photos SET photos.private = '${private}' WHERE id = '${photo.id}' AND user_id = '${user_id}'`;
 			db.query(query_update).then(() => { return response.json({ status: "ok" }); });
 		})
 		.catch(error => {
@@ -153,12 +156,12 @@ router.post('/:uuid/update', (request, response, next) => {
 
 router.post('/create', upload.single('upload'), (request, response, next) => {
 	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
-	const { album, caption, private } = request.body;
+	const { album_id, private } = request.body;
 	const user_id = request.session.user.id;
-	const query_album = `SELECT * FROM albums WHERE id = '${album}' AND user_id = '${user_id}'`;
+	const query_album = `SELECT id, user_id FROM albums WHERE id = '${album_id}' AND user_id = '${user_id}'`;
 	db.query(query_album)
 		.then(albums => {
-			if (album != 0 && albums.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
+			if (album_id != 0 && albums.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
 			const uuid = generate_uuid();
 			const image = sharp(request.file.buffer);
 			image
@@ -166,7 +169,7 @@ router.post('/create', upload.single('upload'), (request, response, next) => {
 				.then(({ exif }) => {
 					const date_exif = new Date(exif_reader(exif).exif.DateTimeOriginal);
 					const date_upload = new Date();
-					const query_insert = `INSERT INTO photos(uuid, user_id, album_id, caption, private, date, created_at, updated_at) VALUES('${uuid}', '${user_id}', '${album}', '${caption}', '${private}', to_timestamp(${date_exif.getTime()/1000}), to_timestamp(${date_upload.getTime()/1000}), to_timestamp(${date_upload.getTime()/1000})) RETURNING *`;
+					const query_insert = `INSERT INTO photos(uuid, user_id, album_id, private, date, created_at, updated_at) VALUES('${uuid}', '${user_id}', '${album_id}', '${private}', to_timestamp(${date_exif.getTime()/1000}), to_timestamp(${date_upload.getTime()/1000}), to_timestamp(${date_upload.getTime()/1000})) RETURNING *`;
 					const upload_directory = `${dirname(require.main.filename).replace('/server','')}/images/${date_upload.getFullYear()}/${date_upload.getMonth()+1}/${date_upload.getDate()}`;
 					if (!fs.existsSync(upload_directory)){ fs.mkdirSync(upload_directory, { recursive: true }); }
 					return Promise.all(	[image.jpeg({ quality: 80 }).resize(4000, 3000, { fit: 'inside', withoutEnlargement: true }).toFile(`${upload_directory}/${uuid}_o.jpg`),

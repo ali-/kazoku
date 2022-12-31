@@ -33,7 +33,6 @@ CREATE TABLE photos (
     uuid uuid UNIQUE,
     user_id integer REFERENCES users(id),
     album_id integer,
-    caption character varying(300),
     private boolean,
     date date,
     created_at timestamp without time zone,
