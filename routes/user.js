@@ -54,9 +54,10 @@ router.post('/:uuid/update', (request, response, next) => {
 	}
 	if (email != request.session.user.email) { update_email = `, users.email = '${email}'`; }
 	// TODO: Check password requirements
-	const query_check = `SELECT * FROM users WHERE email = '${email}'`;
+	const query_check = `SELECT id, email FROM users WHERE email = '${email}'`;
 	db.query(query_check)
 		.then(users => {
+			const user = users.rows[0];
 			if (users.rows.length > 0) { return response.json({ status: "error", error: "email,taken" }); }
 			const query_update = `UPDATE users SET users.firstname = '${firstname}', users.lastname = '${lastname}'${update_email}${update_password} WHERE id = '${id}'`;
 			db.query(query_update)
@@ -79,7 +80,7 @@ router.post('/:uuid/update', (request, response, next) => {
 router.post('/login', (request, response, next) => {
 	const { email, password } = request.body;
 	if (empty(email) || empty(password)) { return response.json({ status: "error", error: "input" }); }
-	const query = `SELECT * FROM users WHERE email = '${email}'`;
+	const query = `SELECT id, email, password FROM users WHERE email = '${email}'`;
 	db.query(query)
 		.then(users => {
 			if (users.rows.length === 0) { return response.json({ status: "error", error: "user,none" }); }
@@ -100,12 +101,12 @@ router.post('/login', (request, response, next) => {
 });
 
 
-router.post('/register', async(request, response, next) => {
+router.post('/register', (request, response, next) => {
 	const { email, firstname, lastname, password } = request.body;
 	if (empty(email) || empty(firstname) || empty(lastname) || empty(password)) { return response.json({ status: "error", error: "null" }); }
 	// TODO: Check password requirements
 	const password_hashed = bcrypt.hashSync(password, 10);
-	const query_check = `SELECT * FROM users WHERE email = '${email}'`
+	const query_check = `SELECT email FROM users WHERE email = '${email}'`
 	db.query(query_check)
 		.then(users => {
 			if (users.rows.length > 0) { return response.json({ status: "error", error: "email" }); }
