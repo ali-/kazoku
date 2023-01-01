@@ -20,5 +20,3 @@ The project is currently in a pre-release state. Feel free to check-back for upd
 
 ## Contributing
 We welcome all contributors of all skill levels.
-
-*This software is provided "as is" without any warranty, for you to do whatever you want with. Kazoku is free, as-in freedom.*
