@@ -10,8 +10,8 @@ const { v4: generate_uuid } = require('uuid');
 router.get('/logout', (request, response, next) => {
 	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	request.session.destroy((error) => {
-		if (error == null) { return response.json({ status: "ok" }); }
-		return response.json({ status: "error", error: "session,destruction" });
+		if (error != null) { response.json({ status: "error", error: "session,destruction" }); }
+		return return response.json({ status: "ok" });
 	});
 });
 
@@ -33,10 +33,7 @@ router.get('/:uuid', (request, response, next) => {
 			const user = users.rows[0];
 			return response.json({ user: user, status: "ok" });
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 
@@ -46,7 +43,7 @@ router.post('/:uuid/update', (request, response, next) => {
 	const id = request.session.user.id;
 	var update_email = '';
 	var update_password = '';
-	if (empty(email) || empty(firstname) || empty(lastname)) { return response.json({ status: "error", error: "empty" }); }
+	if (empty(email) || empty(firstname) || empty(lastname)) { return response.json({ status: "error", error: "field,empty" }); }
 	if (!empty(password)) {
 		if (password != passconf) { return response.json({ status: "error", error: "password,mismatch" }); }
 		const password_hashed = bcrypt.hashSync(password, 10);
@@ -63,23 +60,17 @@ router.post('/:uuid/update', (request, response, next) => {
 			db.query(query_update)
 				.then(() => {
 					request.session.destroy();
-					request.session.user = {
-						id: user.id,
-						email: email
-					};
+					request.session.user = { id: user.id, email: email };
 					return response.json({ status: "ok" });
 				});
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 
 router.post('/login', (request, response, next) => {
 	const { email, password } = request.body;
-	if (empty(email) || empty(password)) { return response.json({ status: "error", error: "input" }); }
+	if (empty(email) || empty(password)) { return response.json({ status: "error", error: "field,empty" }); }
 	const query = `SELECT id, email, password FROM users WHERE email = '${email}'`;
 	db.query(query)
 		.then(users => {
@@ -87,23 +78,17 @@ router.post('/login', (request, response, next) => {
 			const user = users.rows[0];
 			const matches = bcrypt.compareSync(password, user.password);
 			if (!matches) { return response.json({ status: "error", error: "password" }); }
-			request.session.user = {
-				id: user.id,
-				email: user.email
-			};
+			request.session.user = { id: user.id, email: user.email };
 			console.log(request.session.user);
 			return response.json({ status: "ok" });
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 
 router.post('/register', (request, response, next) => {
 	const { email, firstname, lastname, password } = request.body;
-	if (empty(email) || empty(firstname) || empty(lastname) || empty(password)) { return response.json({ status: "error", error: "null" }); }
+	if (empty(email) || empty(firstname) || empty(lastname) || empty(password)) { return response.json({ status: "error", error: "field,empty" }); }
 	// TODO: Check password requirements
 	const password_hashed = bcrypt.hashSync(password, 10);
 	const query_check = `SELECT email FROM users WHERE email = '${email}'`
@@ -111,23 +96,19 @@ router.post('/register', (request, response, next) => {
 		.then(users => {
 			if (users.rows.length > 0) { return response.json({ status: "error", error: "email" }); }
 			const uuid = generate_uuid();
-			const query_insert = `INSERT INTO users(uuid, email, firstname, lastname, password) VALUES('${uuid}', '${email}', '${firstname}', '${lastname}', '${password_hashed}') RETURNING *`;
+			const query_insert = `	INSERT INTO users(uuid, email, firstname, lastname, password)
+									VALUES('${uuid}', '${email}', '${firstname}', '${lastname}', '${password_hashed}')
+									RETURNING *`;
 			console.log(query_insert);
 			db.query(query_insert)
 				.then(results => {
 					const user = results.rows[0];
-					request.session.user = {
-						id: user.id,
-						email: user.email
-					};
+					request.session.user = { id: user.id, email: user.email };
 					console.log(request.session.user);
 					return response.json({ status: "ok" });
 				});
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 

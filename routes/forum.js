@@ -6,16 +6,15 @@ const db = require('../server/database');
 
 router.get('/', (request, response, next) => {
 	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
+	const { page } = request.query;
+	// TODO: Combine posts and threads, order by created_at, limit to X, offset by page*X
 	const query = `SELECT * FROM threads`;
 	db.query(query)
 		.then(threads => {
 			if (threads.rows.length == 0) { return response.json({ status: "error", error: "empty" }) }
 			return response.json({ status: "ok", threads: threads.rows });
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 
@@ -32,12 +31,10 @@ router.get('/thread/:id', (request, response, next) => {
 			return Promise.all([threads, db.query(query_posts)]);
 		})
 		.then(([threads, posts]) => {
-			return response.json({ status: "ok", threads: threads.rows, posts: posts.rows });
+			const thread = threads.rows[0];
+			return response.json({ status: "ok", thread: thread, posts: posts.rows });
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 
@@ -57,10 +54,7 @@ router.post('/thread/:id/delete', (request, response, next) => {
 					return response.json({ status: "ok" });
 				});
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 
@@ -79,10 +73,7 @@ router.post('/thread/:id/favorite', (request, response, next) => {
 					return response.json({ status: "ok" });
 				});
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 
@@ -91,16 +82,14 @@ router.post('/thread/:id/reply', (request, response, next) => {
 	const { content } = request.body;
 	const id = request.params.id;
 	const user_id = request.session.user.id;
+	// TODO: Check if thread is locked
 	const query = `INSERT INTO thread_posts(user_id, thread_id, content) VALUES('${user_id}', '${id}', '${content}')`;
 	db.query(query)
 		.then(() => {
 			console.log(`Replied to thread ${id}`);
 			return response.json({ status: "ok" });
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 
@@ -116,10 +105,7 @@ router.put('/thread/:id/update', (request, response, next) => {
 			const query_update = `UPDATE threads SET threads.title = '${title}', threads.content = '${content}' WHERE id = '${id}' AND user_id = '${user_id}'`;
 			db.query(query_update).then(() => { return response.json({ status: "ok" }); });
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 
@@ -134,10 +120,7 @@ router.post('/thread/create', (request, response, next) => {
 			console.log(`Replied to thread ${id}`);
 			return response.json({ status: "ok" });
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 
@@ -157,10 +140,7 @@ router.post('/post/:id/delete', (request, response, next) => {
 					return response.json({ status: "ok" });
 				});
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 
@@ -176,10 +156,7 @@ router.post('/post/:id/update', (request, response, next) => {
 			const query_update = `UPDATE posts SET posts.content = '${content}' WHERE id = '${id}' AND user_id = '${user_id}'`;
 			db.query(query_update).then(() => { return response.json({ status: "ok" }); });
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 

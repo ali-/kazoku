@@ -17,10 +17,7 @@ router.get('/:uuid', (request, response, next) => {
 			if (album.private === true && album.user_id != user_id) { return response.json({ status: "error", error: "album,private" }); }
 			return response.json({ albums: albums.rows, status: "ok" });
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 
@@ -41,16 +38,13 @@ router.post('/:uuid/delete', (request, response, next) => {
 					return response.json({ status: "ok" });
 				});
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 
 router.post('/:uuid/update', (request, response, next) => {
 	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
-	const { caption, private, title } = request.body;
+	const { private, title } = request.body;
 	const uuid = request.params.uuid;
 	const user_id = request.session.user.id;
 	const query_check = `SELECT id, uuid, user_id FROM albums WHERE uuid = '${uuid}' AND user_id = '${user_id}'`;
@@ -59,32 +53,29 @@ router.post('/:uuid/update', (request, response, next) => {
 		.then(albums => {
 			if (albums.rows.length == 0) { return response.json({ status: "error", error: "album,unavailable" }); }
 			const album = albums.rows[0];
-			const query_update = `UPDATE albums SET albums.title = '${title}', albums.caption = '${caption}', albums.private = '${private}' WHERE id = '${album.id}' AND user_id = '${user_id}'`;
+			const query_update = `UPDATE albums SET albums.title = '${title}', albums.private = '${private}' WHERE id = '${album.id}' AND user_id = '${user_id}'`;
 			db.query(query_update).then(() => { return response.json({ status: "ok" }); });
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 
 router.post('/create', (request, response, next) => {
 	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
-	const { caption, private, title } = request.body;
+	const { private, title } = request.body;
 	const date = new Date();
+	const ts_now = date.getTime()/1000;
 	const user_id = request.session.user.id;
 	const uuid = generate_uuid();
-	const query = `INSERT INTO albums(uuid, user_id, title, caption, private, created_at, updated_at) VALUES('${uuid}', '${user_id}', '${title}', '${caption}', '${private}', '${date.getTime()/1000}', '${date.getTime()/1000}') RETURNING *`;
+	const query = `	INSERT INTO albums(uuid, user_id, title, private, created_at, updated_at)
+					VALUES('${uuid}', '${user_id}', '${title}', '${private}', '${ts_now}', '${ts_now}')
+					RETURNING *`;
 	db.query(query)
 		.then(albums => {
 			const album = albums.rows[0];
 			return response.json({ album_uuid: album.uuid, status: "ok" });
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 

@@ -1,4 +1,4 @@
 .DS_Store
 .env
-images/*
+images
 node_modules

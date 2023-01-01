@@ -39,43 +39,29 @@ router.get('/:uuid', (request, response, next) => {
 					return response.json({ photo: photo, status: "ok" });
 				});
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 
 router.post('/:uuid/comment', (request, response, next) => {
-	// TODO: Route needs to be checked and rewritten
 	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
-	const { album, comment } = request.body;
+	const { album_uuid, comment } = request.body;
+	if (empty(album) || empty(comment)) { return response.json({ status: "error", error: "field,empty" }); }
 	const uuid = request.params.uuid;
 	const user_id = request.session.user.id;
-	const query_album = `SELECT id, user_id, uuid, private FROM albums WHERE uuid = '${album}'`;
+	const query_album = `SELECT user_id, uuid, private FROM albums WHERE uuid = '${album_uuid}'`;
 	const query_photo = `SELECT id, user_id, uuid, private FROM photos WHERE uuid = '${uuid}'`;
 	db.query(query_album)
-		.then(albums => {
-			return Promise.all([albums, db.query(query_photo)]);
-		})
+		.then(albums => { return Promise.all([albums, db.query(query_photo)]); })
 		.then(([albums, photos]) => {
-			if (albums.rows.length == 0 || photos.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
+			if ((albums.rows.length === 0 && album_uuid != 0) || photos.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
 			const album = albums.rows[0];
 			const photo = photos.rows[0];
-			if ((album.private === true && album.user_id != user_id) || (photo.private === true && photo.user_id != user_id)) {
-				return response.json({ status: "error", error: "photo,private" });
-			}
+			if ((album.private === true && album.user_id != user_id) || (photo.private === true && photo.user_id != user_id)) { return response.json({ status: "error", error: "photo,private" }); }
 			const query_insert = `INSERT INTO photo_comments(user_id, photo_id, comment) VALUES('${user_id}', '${photo.id}', '${comment}') RETURNING *`;
-			db.query(query_insert)
-				.then(() => {
-					console.log(`Commented on photo ${photo.id}`);
-					return response.json({ status: "ok" });
-				});
+			db.query(query_insert).then(() => { return response.json({ status: "ok" }); });
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 
@@ -89,54 +75,37 @@ router.post('/:uuid/delete', (request, response, next) => {
 			if (photos.rows.length == 0) { return response.json({ status: "error", error: "photo,unavailable" }); }
 			const photo = photos.rows[0];
 			const query_delete = `DELETE photos WHERE id = '${photo.id}' AND user_id = '${user_id}'`;
-			db.query(query_delete)
-				.then(() => {
-					console.log(`Photo ${photo.id} deleted`);
-					return response.json({ status: "ok" });
-				});
+			db.query(query_delete).then(() => { return response.json({ status: "ok" }); });
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 
 router.post('/:uuid/favorite', (request, response, next) => {
 	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
-	const { album } = request.body;
+	const { album_uuid } = request.body;
+	if (empty(album) || empty(comment)) { return response.json({ status: "error", error: "field,empty" }); }
 	const uuid = request.params.uuid;
 	const user_id = request.session.user.id;
-	const query_album = `SELECT * FROM albums WHERE id = '${album}'`;
-	const query_photo = `SELECT * FROM photos WHERE uuid = '${uuid}'`;
+	const query_album = `SELECT user_id, uuid, private FROM albums WHERE uuid = '${album_uuid}'`;
+	const query_photo = `SELECT id, user_id, uuid, private FROM photos WHERE uuid = '${uuid}'`;
 	db.query(query_album)
-		.then(albums => {
-			return Promise.all([albums, db.query(query_photo)]);
-		})
+		.then(albums => { return Promise.all([albums, db.query(query_photo)]); })
 		.then(([albums, photos]) => {
-			if (albums.rows.length == 0 || photos.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
+			if ((albums.rows.length === 0 && album_uuid != 0) || photos.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
 			const album = albums.rows[0];
 			const photo = photos.rows[0];
-			if ((album.private === true && album.user_id != user_id) || (photo.private === true && photo.user_id != user_id)) {
-				return response.json({ status: "error", error: "photo,private" });
-			}
+			if ((album.private === true && album.user_id != user_id) || (photo.private === true && photo.user_id != user_id)) { return response.json({ status: "error", error: "photo,private" }); }
 			const query_insert = `INSERT INTO photo_favorites(user_id, photo_id) VALUES('${user_id}', '${photo.id}')`;
-			db.query(query_insert)
-				.then(() => {
-					console.log(`Favorited photo ${photo.id}`);
-					return response.json({ status: "ok" });
-				});
+			db.query(query_insert).then(() => { return response.json({ status: "ok" }); });
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 
 router.post('/:uuid/update', (request, response, next) => {
 	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
-	const { private } = request.body;
+	const { caption } = request.body;
 	const uuid = request.params.uuid;
 	const user_id = request.session.user.id;
 	const query_check = `SELECT id, uuid, user_id FROM photos WHERE uuid = '${uuid}' AND user_id = '${user_id}'`;
@@ -144,13 +113,10 @@ router.post('/:uuid/update', (request, response, next) => {
 		.then(photos => {
 			if (photos.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
 			const photo = photos.rows[0];
-			const query_update = `UPDATE photos SET photos.private = '${private}' WHERE id = '${photo.id}' AND user_id = '${user_id}'`;
+			const query_update = `UPDATE photos SET photos.caption = '${caption}' WHERE id = '${photo.id}' AND user_id = '${user_id}'`;
 			db.query(query_update).then(() => { return response.json({ status: "ok" }); });
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 
@@ -169,7 +135,11 @@ router.post('/create', upload.single('upload'), (request, response, next) => {
 				.then(({ exif }) => {
 					const date_exif = new Date(exif_reader(exif).exif.DateTimeOriginal);
 					const date_upload = new Date();
-					const query_insert = `INSERT INTO photos(uuid, user_id, album_id, private, date, created_at, updated_at) VALUES('${uuid}', '${user_id}', '${album_id}', '${private}', to_timestamp(${date_exif.getTime()/1000}), to_timestamp(${date_upload.getTime()/1000}), to_timestamp(${date_upload.getTime()/1000})) RETURNING *`;
+					const ts_exif = date_exif.getTime()/1000;
+					const ts_now = date_upload.getTime()/1000;
+					const query_insert = `	INSERT INTO photos(uuid, user_id, album_id, private, date, created_at, updated_at)
+											VALUES('${uuid}', '${user_id}', '${album_id}', '${private}', to_timestamp(${ts_exif}), to_timestamp(${ts_now}), to_timestamp(${ts_now}))
+											RETURNING *`;
 					const upload_directory = `${dirname(require.main.filename).replace('/server','')}/images/${date_upload.getFullYear()}/${date_upload.getMonth()+1}/${date_upload.getDate()}`;
 					if (!fs.existsSync(upload_directory)){ fs.mkdirSync(upload_directory, { recursive: true }); }
 					return Promise.all(	[image.jpeg({ quality: 80 }).resize(4000, 3000, { fit: 'inside', withoutEnlargement: true }).toFile(`${upload_directory}/${uuid}_o.jpg`),
@@ -181,10 +151,7 @@ router.post('/create', upload.single('upload'), (request, response, next) => {
 					return response.json({ photo_id: photo.id, status: "ok" });
 				});
 		})
-		.catch(error => {
-			console.error(error.stack);
-			return response.json({ status: "error", error: "database" });
-		});
+		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
 
