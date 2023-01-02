@@ -19,6 +19,7 @@ CREATE TABLE albums (
     uuid uuid UNIQUE,
     user_id integer REFERENCES users(id),
     title character varying(50),
+    private boolean,
     created_at timestamp without time zone,
     updated_at timestamp without time zone
 );
@@ -31,7 +32,6 @@ CREATE TABLE photos (
     uuid uuid UNIQUE,
     user_id integer REFERENCES users(id),
     album_id integer,
-    caption character varying(300),
     date date,
     created_at timestamp without time zone,
     updated_at timestamp without time zone
