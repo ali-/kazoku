@@ -103,26 +103,9 @@ router.post('/:uuid/favorite', (request, response, next) => {
 });
 
 
-router.post('/:uuid/update', (request, response, next) => {
-	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
-	const { caption } = request.body;
-	const uuid = request.params.uuid;
-	const user_id = request.session.user.id;
-	const query_check = `SELECT id, uuid, user_id FROM photos WHERE uuid = '${uuid}' AND user_id = '${user_id}'`;
-	db.query(query_check)
-		.then(photos => {
-			if (photos.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
-			const photo = photos.rows[0];
-			const query_update = `UPDATE photos SET photos.caption = '${caption}' WHERE id = '${photo.id}' AND user_id = '${user_id}'`;
-			db.query(query_update).then(() => { return response.json({ status: "ok" }); });
-		})
-		.catch(error => { return response.json({ status: "error", error: "database" }); });
-});
-
-
 router.post('/create', upload.single('upload'), (request, response, next) => {
 	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
-	const { album_id, private } = request.body;
+	const { album_id } = request.body;
 	const user_id = request.session.user.id;
 	const query_album = `SELECT id, user_id FROM albums WHERE id = '${album_id}' AND user_id = '${user_id}'`;
 	db.query(query_album)
@@ -137,8 +120,8 @@ router.post('/create', upload.single('upload'), (request, response, next) => {
 					const date_upload = new Date();
 					const ts_exif = date_exif.getTime()/1000;
 					const ts_now = date_upload.getTime()/1000;
-					const query_insert = `	INSERT INTO photos(uuid, user_id, album_id, private, date, created_at, updated_at)
-											VALUES('${uuid}', '${user_id}', '${album_id}', '${private}', to_timestamp(${ts_exif}), to_timestamp(${ts_now}), to_timestamp(${ts_now}))
+					const query_insert = `	INSERT INTO photos(uuid, user_id, album_id, date, created_at, updated_at)
+											VALUES('${uuid}', '${user_id}', '${album_id}', to_timestamp(${ts_exif}), to_timestamp(${ts_now}), to_timestamp(${ts_now}))
 											RETURNING *`;
 					const upload_directory = `${dirname(require.main.filename).replace('/server','')}/images/${date_upload.getFullYear()}/${date_upload.getMonth()+1}/${date_upload.getDate()}`;
 					if (!fs.existsSync(upload_directory)){ fs.mkdirSync(upload_directory, { recursive: true }); }
