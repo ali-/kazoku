@@ -11,7 +11,7 @@ router.get('/logout', (request, response, next) => {
 	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	request.session.destroy((error) => {
 		if (error != null) { response.json({ status: "error", error: "session,destruction" }); }
-		return return response.json({ status: "ok" });
+		return response.json({ status: "ok" });
 	});
 });
 
