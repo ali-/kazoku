@@ -119,9 +119,10 @@ router.post('/create', upload.single('upload'), (request, response, next) => {
 					const date_upload = new Date();
 					const ts_exif = date_exif.getTime()/1000;
 					const ts_now = date_upload.getTime()/1000;
-					const query_insert = `	INSERT INTO photos(uuid, user_id, album_id, date, created_at, updated_at)
-											VALUES('${uuid}', '${user_id}', '${album_id}', to_timestamp(${ts_exif}), to_timestamp(${ts_now}), to_timestamp(${ts_now}))
-											RETURNING *`;
+					const query_insert =
+						`INSERT INTO photos(uuid, user_id, album_id, date, created_at, updated_at)
+						VALUES('${uuid}', '${user_id}', '${album_id}', to_timestamp(${ts_exif}), to_timestamp(${ts_now}), to_timestamp(${ts_now}))
+						RETURNING *`;
 					const upload_directory = `${dirname(require.main.filename).replace('/server','')}/images/${date_upload.getFullYear()}/${date_upload.getMonth()+1}/${date_upload.getDate()}`;
 					if (!fs.existsSync(upload_directory)){ fs.mkdirSync(upload_directory, { recursive: true }); }
 					return Promise.all(	[image.jpeg({ quality: 80 }).resize(4000, 3000, { fit: 'inside', withoutEnlargement: true }).toFile(`${upload_directory}/${uuid}_o.jpg`),

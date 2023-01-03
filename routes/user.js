@@ -40,10 +40,12 @@ router.get('/:uuid', (request, response, next) => {
 router.post('/:uuid/update', (request, response, next) => {
 	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
 	const { email, firstname, lastname, passconf, password } = request.body;
+	if (empty(email) || empty(firstname) || empty(lastname)) { return response.json({ status: "error", error: "field,empty" }); }
 	const id = request.session.user.id;
+	const date = new Date();
+	const ts_now = date.getTime()/1000;
 	var update_email = '';
 	var update_password = '';
-	if (empty(email) || empty(firstname) || empty(lastname)) { return response.json({ status: "error", error: "field,empty" }); }
 	if (!empty(password)) {
 		if (password != passconf) { return response.json({ status: "error", error: "password,mismatch" }); }
 		const password_hashed = bcrypt.hashSync(password, 10);
@@ -56,7 +58,9 @@ router.post('/:uuid/update', (request, response, next) => {
 		.then(users => {
 			const user = users.rows[0];
 			if (users.rows.length > 0) { return response.json({ status: "error", error: "email,taken" }); }
-			const query_update = `UPDATE users SET users.firstname = '${firstname}', users.lastname = '${lastname}'${update_email}${update_password} WHERE id = '${id}'`;
+			const query_update =
+				`UPDATE users SET users.firstname = '${firstname}', users.lastname = '${lastname}', users.updated_at = to_timestamp(${ts_now})${update_email}${update_password}
+				WHERE id = '${id}'`;
 			db.query(query_update)
 				.then(() => {
 					request.session.destroy();
@@ -89,6 +93,8 @@ router.post('/login', (request, response, next) => {
 router.post('/register', (request, response, next) => {
 	const { email, firstname, lastname, password } = request.body;
 	if (empty(email) || empty(firstname) || empty(lastname) || empty(password)) { return response.json({ status: "error", error: "field,empty" }); }
+	const date = new Date();
+	const ts_now = date.getTime()/1000;
 	// TODO: Check password requirements
 	const password_hashed = bcrypt.hashSync(password, 10);
 	const query_check = `SELECT email FROM users WHERE email = '${email}'`
@@ -96,9 +102,10 @@ router.post('/register', (request, response, next) => {
 		.then(users => {
 			if (users.rows.length > 0) { return response.json({ status: "error", error: "email" }); }
 			const uuid = generate_uuid();
-			const query_insert = `	INSERT INTO users(uuid, email, firstname, lastname, password)
-									VALUES('${uuid}', '${email}', '${firstname}', '${lastname}', '${password_hashed}')
-									RETURNING *`;
+			const query_insert =
+				`INSERT INTO users(uuid, email, firstname, lastname, password, created_at, updated_at)
+				VALUES('${uuid}', '${email}', '${firstname}', '${lastname}', '${password_hashed}', to_timestamp(${ts_now}), to_timestamp(${ts_now}))
+				RETURNING *`;
 			console.log(query_insert);
 			db.query(query_insert)
 				.then(results => {
