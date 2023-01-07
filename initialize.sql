@@ -2,7 +2,7 @@ CREATE TABLE users (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     uuid uuid UNIQUE,
     email character varying(50) UNIQUE,
-    password character varying(30),
+    password character varying(64),
     firstname character varying(30),
     lastname character varying(30),
     birthday date,
