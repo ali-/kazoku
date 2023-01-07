@@ -48,12 +48,9 @@ router.post('/thread/:id/delete', (request, response, next) => {
 			if (threads.rows.length == 0) { return response.json({ status: "error", error: "empty" }) }
 			const thread = threads.rows[0];
 			const query_delete = `DELETE threads WHERE id = '${id}' AND user_id = '${user_id}'`;
-			db.query(query_delete)
-				.then(() => {
-					console.log(`Thread ${thread.id} deleted`);
-					return response.json({ status: "ok" });
-				});
+			return db.query(query_delete);
 		})
+		.then(() => { return response.json({ status: "ok" }); })
 		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
@@ -67,12 +64,9 @@ router.post('/thread/:id/favorite', (request, response, next) => {
 		.then(threads => {
 			if (threads.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
 			const query_insert = `INSERT INTO thread_favorites(user_id, thread_id) VALUES('${user_id}', '${id}')`;
-			db.query(query_insert)
-				.then(() => {
-					console.log(`Favorited thread ${id}`);
-					return response.json({ status: "ok" });
-				});
+			return db.query(query_insert);
 		})
+		.then(() => { return response.json({ status: "ok" }); })
 		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
@@ -85,10 +79,7 @@ router.post('/thread/:id/reply', (request, response, next) => {
 	// TODO: Check if thread is locked
 	const query = `INSERT INTO thread_posts(user_id, thread_id, content) VALUES('${user_id}', '${id}', '${content}')`;
 	db.query(query)
-		.then(() => {
-			console.log(`Replied to thread ${id}`);
-			return response.json({ status: "ok" });
-		})
+		.then(() => { return response.json({ status: "ok" }); })
 		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
@@ -103,8 +94,9 @@ router.put('/thread/:id/update', (request, response, next) => {
 		.then(threads => {
 			if (threads.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
 			const query_update = `UPDATE threads SET threads.title = '${title}', threads.content = '${content}' WHERE id = '${id}' AND user_id = '${user_id}'`;
-			db.query(query_update).then(() => { return response.json({ status: "ok" }); });
+			return db.query(query_update);
 		})
+		.then(() => { return response.json({ status: "ok" }); })
 		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
@@ -116,10 +108,7 @@ router.post('/thread/create', (request, response, next) => {
 	const user_id = request.session.user.id;
 	const query = `INSERT INTO threads(user_id, title, content) VALUES('${user_id}', '${id}', '${content}')`;
 	db.query(query)
-		.then(() => {
-			console.log(`Replied to thread ${id}`);
-			return response.json({ status: "ok" });
-		})
+		.then(() => { return response.json({ status: "ok" }); })
 		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
@@ -134,12 +123,9 @@ router.post('/post/:id/delete', (request, response, next) => {
 			if (posts.rows.length == 0) { return response.json({ status: "error", error: "empty" }) }
 			const post = posts.rows[0];
 			const query_delete = `DELETE thread_posts WHERE id = '${id}' AND user_id = '${user_id}'`;
-			db.query(query_delete)
-				.then(() => {
-					console.log(`Post ${post.id} deleted`);
-					return response.json({ status: "ok" });
-				});
+			return db.query(query_delete);
 		})
+		.then(() => { return response.json({ status: "ok" }); })
 		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
@@ -154,8 +140,9 @@ router.post('/post/:id/update', (request, response, next) => {
 		.then(posts => {
 			if (posts.rows.length == 0) { return response.json({ status: "error", error: "unavailable" }); }
 			const query_update = `UPDATE posts SET posts.content = '${content}' WHERE id = '${id}' AND user_id = '${user_id}'`;
-			db.query(query_update).then(() => { return response.json({ status: "ok" }); });
+			return db.query(query_update);
 		})
+		.then(() => { return response.json({ status: "ok" }); });
 		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 

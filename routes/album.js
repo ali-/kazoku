@@ -31,13 +31,10 @@ router.post('/:uuid/delete', (request, response, next) => {
 			if (albums.rows.length == 0) { return response.json({ status: "error", error: "album,unavailable" }); }
 			const album = albums.rows[0];
 			const query_delete = `DELETE albums WHERE id = '${album.id}' AND user_id = '${user_id}'`;
-			db.query(query_delete)
-				.then(() => {
-					// TODO: Delete all photos inside
-					console.log(`Album ${album.id} deleted`);
-					return response.json({ status: "ok" });
-				});
+			return db.query(query_delete);
 		})
+		// TODO: Delete all photos inside
+		.then(() => { return response.json({ status: "ok" }); })
 		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 
@@ -58,8 +55,9 @@ router.post('/:uuid/update', (request, response, next) => {
 			const query_update =
 				`UPDATE albums SET albums.title = '${title}', albums.private = '${private}', albums.updated_at = to_timestamp(${ts_now})
 				WHERE id = '${album.id}' AND user_id = '${user_id}'`;
-			db.query(query_update).then(() => { return response.json({ status: "ok" }); });
+			return db.query(query_update);
 		})
+		.then(() => { return response.json({ status: "ok" }); })
 		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
 

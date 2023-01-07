@@ -56,17 +56,18 @@ router.post('/:uuid/update', (request, response, next) => {
 	const query_check = `SELECT id, email FROM users WHERE email = '${email}'`;
 	db.query(query_check)
 		.then(users => {
-			const user = users.rows[0];
 			if (users.rows.length > 0) { return response.json({ status: "error", error: "email,taken" }); }
 			const query_update =
 				`UPDATE users SET users.firstname = '${firstname}', users.lastname = '${lastname}', users.updated_at = to_timestamp(${ts_now})${update_email}${update_password}
 				WHERE id = '${id}'`;
-			db.query(query_update)
-				.then(() => {
-					request.session.destroy();
-					request.session.user = { id: user.id, email: email };
-					return response.json({ status: "ok" });
-				});
+			db.query(query_update);
+			return users;
+		})
+		.then(users => {
+			const user = users.rows[0];
+			request.session.destroy();
+			request.session.user = { id: user.id, email: email };
+			return response.json({ status: "ok" });
 		})
 		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });
@@ -107,13 +108,13 @@ router.post('/register', (request, response, next) => {
 				VALUES('${uuid}', '${email}', '${firstname}', '${lastname}', '${password_hashed}', to_timestamp(${ts_now}), to_timestamp(${ts_now}))
 				RETURNING *`;
 			console.log(query_insert);
-			db.query(query_insert)
-				.then(results => {
-					const user = results.rows[0];
-					request.session.user = { id: user.id, email: user.email };
-					console.log(request.session.user);
-					return response.json({ status: "ok" });
-				});
+			return db.query(query_insert);
+		})
+		.then(results => {
+			const user = results.rows[0];
+			request.session.user = { id: user.id, email: user.email };
+			console.log(request.session.user);
+			return response.json({ status: "ok" });
 		})
 		.catch(error => { return response.json({ status: "error", error: "database" }); });
 });

@@ -4,7 +4,6 @@ import strings from './localization/en.json';
 
 
 const Photo = () => {
-	const [caption, setCaption] = useState('');
 	const [upload, setUpload] = useState()
 
 	function handleChange(event) {
@@ -16,9 +15,8 @@ const Photo = () => {
 		const headers = { 'content-type': 'multipart/form-data' };
 		const payload = new FormData();
 		payload.append('upload', upload);
-		payload.append('caption', caption);
 		axios
-			.post('http://localhost:3001/api/photo/create', payload, { 
+			.post('http://localhost:3001/api/photo/create', payload, {
 				headers: headers,
 				withCredentials: true
 			})
@@ -33,13 +31,6 @@ const Photo = () => {
 		<section>
 			<h2>{strings["upload"]}</h2>
 			<form onSubmit={handlePhoto} autoComplete="off" enctype="multipart/form-data">
-				<input
-					type="text"
-					value={caption}
-					onChange={(e) => setCaption(e.target.value)}
-					required
-				/>
-				<br/>
 				<input
 					type="file"
 					onChange={handleChange}
