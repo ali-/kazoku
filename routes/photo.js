@@ -105,8 +105,7 @@ router.post('/:uuid/favorite', (request, response, next) => {
 
 router.post('/create', upload.single('upload'), (request, response, next) => {
 	if (request.session.user == null) { return response.json({ status: "error", error: "session,invalid" }); }
-	//const { album_id } = request.body;
-	const album_id = 2;
+	const { album_id } = request.body;
 	const user_id = request.session.user.id;
 	const query_album = `SELECT id, user_id FROM albums WHERE id = '${album_id}' AND user_id = '${user_id}'`;
 	db.query(query_album)
